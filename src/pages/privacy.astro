@@ -1,0 +1,81 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/ui/PageHero.astro';
+import { company, contact } from '../data/site';
+---
+
+<BaseLayout
+  title="Privacy notice"
+  description="How Black Crystal Consulting handles the personal information you share through this website."
+>
+  <PageHero title="Privacy notice" eyebrow="Legal" size="compact" />
+  <section class="section">
+    <div class="container container--narrow prose">
+      <p class="draft-note">
+        This notice describes how this website handles personal information. It is awaiting review by Black
+        Crystal and its legal advisers before launch.
+      </p>
+
+      <h2>Who we are</h2>
+      <p>
+        This website is operated by {company.name}, an environmental and social advisory company registered in
+        Zimbabwe (Company Registration No. {company.registrationNumber}) and in South Africa.
+      </p>
+
+      <h2>What we collect</h2>
+      <p>
+        We only collect personal information that you choose to send us through the enquiry form: your name,
+        email address, company or organisation, the service you are interested in, your project location and
+        your message.
+      </p>
+      <p>
+        The website does not use advertising or analytics trackers and does not set cookies. Like most
+        websites, our hosting provider may keep standard server logs (such as IP address, browser type and the
+        pages requested) for security and troubleshooting.
+      </p>
+
+      <h2>How we use it</h2>
+      <p>
+        We use the details you send only to respond to your enquiry and to discuss your project. Your enquiry
+        is sent to our team by email. To protect the form from abuse, the server temporarily records the
+        network address of each submission in memory to limit repeated submissions; it is not stored with your
+        enquiry.
+      </p>
+
+      <h2>Sharing</h2>
+      <p>
+        We do not sell your personal information or share it with third parties for marketing. It may be
+        processed by the email and hosting providers we use to operate this website and to receive your
+        enquiry.
+      </p>
+
+      <h2>How long we keep it</h2>
+      <p>
+        We keep enquiry correspondence only for as long as needed to respond and to manage any resulting
+        project, unless a longer period is required by law.
+      </p>
+
+      <h2>Your rights</h2>
+      <p>
+        You may ask us to access, correct or delete the personal information you have sent us, subject to
+        applicable data-protection laws, including the Cyber and Data Protection Act of Zimbabwe and, where it
+        applies, the Protection of Personal Information Act of South Africa.
+      </p>
+
+      <h2>Contact</h2>
+      <p>
+        For any privacy question, email <a href={`mailto:${contact.email}`}>{contact.email}</a>.
+      </p>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .draft-note {
+    padding: 14px 16px;
+    border: 1px solid #ecd39c;
+    border-radius: var(--radius-md);
+    background: #fffaf0;
+    font-size: 0.9375rem;
+  }
+</style>

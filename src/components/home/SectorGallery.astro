@@ -1,0 +1,137 @@
+---
+import Icon from '../ui/Icon.astro';
+import MediaImage from '../ui/MediaImage.astro';
+import { getSectors } from '../../lib/content';
+
+const sectors = await getSectors();
+---
+
+<section class="sectors section section--cream" aria-labelledby="sectors-title">
+  <div class="sectors__grid container container--wide">
+    <div class="sectors__intro" data-reveal>
+      <p class="eyebrow">Our sectors</p>
+      <h2 id="sectors-title">
+        Real challenges. <span class="block">Balanced solutions.</span>
+      </h2>
+      <p>
+        We work with clients across mining, energy, infrastructure, housing and tourism, providing the insight
+        needed to develop responsibly.
+      </p>
+      <a href="/sectors/" class="link-arrow">
+        Explore All Sectors <Icon name="arrow-right" />
+      </a>
+    </div>
+    <ul class="sector-rail" role="list" aria-label="Sectors">
+      {sectors.map((s, i) => (
+        <li data-reveal data-reveal-step={String(i % 5)}>
+          <a href={`/sectors/${s.id}/`} class="sector-card">
+            <span class="sector-card__media media-zoom">
+              <MediaImage
+                name={s.data.cardImage}
+                widths={[280, 420, 560]}
+                sizes="(min-width: 1360px) 196px, (min-width: 1024px) 14vw, (min-width: 600px) 34vw, 62vw"
+                alt=""
+              />
+            </span>
+            <span class="sector-card__label">
+              <Icon name={s.data.icon} size={22} />
+              <span>{s.data.title}</span>
+            </span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .sectors__grid {
+    display: grid;
+    grid-template-columns: minmax(260px, 0.85fr) minmax(0, 2.4fr);
+    gap: clamp(28px, 4vw, 56px);
+    align-items: center;
+  }
+  .sectors__intro h2 {
+    margin-bottom: 18px;
+  }
+  .block {
+    display: block;
+  }
+  .sectors__intro p:not(.eyebrow) {
+    max-width: 40ch;
+    margin-bottom: 14px;
+    color: var(--color-muted);
+  }
+  .sector-rail {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: clamp(10px, 1.1vw, 16px);
+  }
+  .sector-card {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    border-radius: var(--radius-lg);
+    color: #fff;
+    text-decoration: none;
+    box-shadow: var(--shadow-subtle);
+  }
+  .sector-card__media :global(img) {
+    width: 100%;
+    aspect-ratio: 3 / 4.3;
+    object-fit: cover;
+  }
+  .sector-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgb(18 14 11 / 0%) 45%, rgb(18 14 11 / 82%) 100%);
+    pointer-events: none;
+  }
+  .sector-card__label {
+    position: absolute;
+    left: 14px;
+    right: 12px;
+    bottom: 14px;
+    z-index: 1;
+    display: grid;
+    gap: 8px;
+    font-size: 0.95rem;
+    font-weight: 800;
+    line-height: 1.25;
+    text-shadow: 0 1px 10px rgb(0 0 0 / 40%);
+  }
+  .sector-card__label :global(svg) {
+    color: #fff;
+  }
+  .sector-card:hover .sector-card__label > span {
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+  }
+
+  @media (max-width: 1023.98px) {
+    .sectors__grid {
+      grid-template-columns: 1fr;
+    }
+    .sector-rail {
+      grid-template-columns: none;
+      grid-auto-flow: column;
+      grid-auto-columns: minmax(200px, 34%);
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      scroll-snap-type: x mandatory;
+      scroll-padding-inline: var(--gutter);
+      margin-inline: calc(-1 * var(--gutter));
+      padding: 4px var(--gutter) 14px;
+      scrollbar-width: thin;
+    }
+    .sector-rail > li {
+      scroll-snap-align: start;
+    }
+  }
+  @media (max-width: 599.98px) {
+    .sector-rail {
+      grid-auto-columns: 62%;
+    }
+  }
+</style>

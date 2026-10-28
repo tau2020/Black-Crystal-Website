@@ -1,0 +1,364 @@
+---
+import Icon from '../ui/Icon.astro';
+import MediaImage from '../ui/MediaImage.astro';
+import { formatPeriod, getFeaturedProjects } from '../../lib/content';
+import { portfolioGroups } from '../../data/site';
+
+const carousel = await getFeaturedProjects('carousel');
+const cards = await getFeaturedProjects('card');
+const total = carousel.length;
+const groupLabel = (g: keyof typeof portfolioGroups) =>
+  g === 'energy-renewable' || g === 'energy-conventional'
+    ? 'Energy'
+    : portfolioGroups[g].replace(/ sector$/, '');
+---
+
+<section class="featured section section--warm" id="featured-projects" aria-labelledby="featured-title">
+  <div class="container container--wide">
+    <div class="section-head" data-reveal>
+      <div class="section-head__text">
+        <p class="eyebrow">Featured projects</p>
+        <h2 id="featured-title">Delivering impact across Southern Africa.</h2>
+      </div>
+      <a href="/projects/" class="link-arrow">
+        View All Projects <Icon name="arrow-right" />
+      </a>
+    </div>
+
+    <div class="featured__grid">
+      <div
+        class="carousel"
+        data-carousel
+        role="group"
+        aria-roledescription="carousel"
+        aria-label="Featured projects"
+      >
+        <div class="carousel__slides">
+          {carousel.map((p, i) => (
+            <article
+              class="feature-card"
+              data-slide
+              role="group"
+              aria-roledescription="slide"
+              aria-label={`${i + 1} of ${total}`}
+              hidden={i > 0}
+            >
+              <div class="feature-card__media media-zoom">
+                <MediaImage
+                  name={p.data.image}
+                  widths={[480, 720, 960]}
+                  sizes="(min-width: 1100px) 30vw, (min-width: 700px) 50vw, 100vw"
+                  alt=""
+                  loading="lazy"
+                />
+              </div>
+              <div class="feature-card__body">
+                <p class="eyebrow feature-card__sector">{groupLabel(p.data.portfolio)}</p>
+                <h3 class="feature-card__title">
+                  <a href={`/projects/${p.id}/`}>{p.data.title}</a>
+                </h3>
+                <p class="feature-card__desc">{p.data.description}</p>
+                <dl class="feature-card__meta">
+                  {p.data.client && (
+                    <div>
+                      <dt>Client</dt>
+                      <dd>{p.data.client}</dd>
+                    </div>
+                  )}
+                  <div>
+                    <dt>Period</dt>
+                    <dd>{formatPeriod(p.data)}</dd>
+                  </div>
+                </dl>
+                <a href={`/projects/${p.id}/`} class="link-arrow" aria-hidden="true" tabindex="-1">
+                  View Project <Icon name="arrow-right" />
+                </a>
+              </div>
+            </article>
+          ))}
+        </div>
+        <div class="carousel__controls" data-carousel-controls hidden>
+          <button type="button" class="carousel__btn" data-carousel-prev>
+            <Icon name="arrow-left" size={18} />
+            <span class="visually-hidden">Previous featured project</span>
+          </button>
+          <span class="carousel__count" aria-hidden="true">
+            <span data-carousel-index>1</span> / {total}
+          </span>
+          <button type="button" class="carousel__btn" data-carousel-next>
+            <Icon name="arrow-right" size={18} />
+            <span class="visually-hidden">Next featured project</span>
+          </button>
+        </div>
+        <p class="visually-hidden" aria-live="polite" data-carousel-status></p>
+      </div>
+
+      <ul class="featured__side" role="list">
+        {cards.map((p) => (
+          <li class="mini-card card-link">
+            <div class="mini-card__media media-zoom">
+              <MediaImage
+                name={p.data.image}
+                widths={[360, 560]}
+                sizes="(min-width: 1100px) 18vw, 50vw"
+                alt=""
+              />
+            </div>
+            <div class="mini-card__body">
+              <h3>
+                <a class="stretched" href={`/projects/${p.id}/`}>
+                  {p.data.title}
+                </a>
+              </h3>
+              <p class="mini-card__meta">
+                <span>{groupLabel(p.data.portfolio)}</span> · <span>{formatPeriod(p.data)}</span>
+              </p>
+              <span class="mini-card__arrow" aria-hidden="true">
+                <Icon name="arrow-right" size={18} />
+              </span>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
+    <p class="featured__note">
+      Project details are as documented in the Black Crystal Company Profile 2024. Photographs are
+      illustrative and do not depict the named projects.
+    </p>
+  </div>
+</section>
+
+<script>
+  import { initCarousel } from '../../scripts/carousel';
+  document.querySelectorAll<HTMLElement>('[data-carousel]').forEach((el) => initCarousel(el));
+</script>
+
+<style>
+  .featured__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.75fr) minmax(0, 1fr);
+    gap: clamp(16px, 1.8vw, 24px);
+    align-items: stretch;
+  }
+  .carousel {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: #fff;
+    overflow: hidden;
+  }
+  .carousel__slides {
+    flex: 1;
+    display: grid;
+  }
+  .feature-card {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+    min-height: 100%;
+  }
+  .feature-card[hidden] {
+    display: none;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .feature-card {
+      animation: slide-in 420ms var(--ease-out);
+    }
+  }
+  @keyframes slide-in {
+    from {
+      opacity: 0;
+      transform: translateX(10px);
+    }
+  }
+  .feature-card__media {
+    position: relative;
+    min-height: 300px;
+  }
+  .feature-card__media :global(picture),
+  .feature-card__media :global(img) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .feature-card__body {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: clamp(22px, 2.6vw, 36px) clamp(20px, 2.6vw, 36px) 76px;
+  }
+  .feature-card__sector {
+    margin-bottom: 8px;
+  }
+  .feature-card__title {
+    font-size: clamp(1.25rem, 1.8vw, 1.6rem);
+    line-height: 1.22;
+  }
+  .feature-card__title a {
+    color: inherit;
+    text-decoration: none;
+  }
+  .feature-card__title a:hover {
+    text-decoration: underline;
+    text-underline-offset: 0.18em;
+  }
+  .feature-card__desc {
+    margin-top: 12px;
+    color: var(--color-muted);
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .feature-card__meta {
+    display: grid;
+    gap: 6px;
+    margin: 16px 0 10px;
+    font-size: 0.875rem;
+  }
+  .feature-card__meta div {
+    display: flex;
+    gap: 8px;
+  }
+  .feature-card__meta dt {
+    min-width: 52px;
+    color: var(--color-muted);
+    font-weight: 700;
+  }
+  .feature-card__meta dd {
+    margin: 0;
+    font-weight: 600;
+  }
+  .carousel__controls {
+    position: absolute;
+    right: clamp(20px, 2.6vw, 36px);
+    bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .carousel__btn {
+    display: inline-grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border: 1px solid var(--color-border-strong);
+    border-radius: 50%;
+    background: #fff;
+    color: var(--bc-thunder);
+    transition:
+      background-color var(--duration-fast) var(--ease-standard),
+      border-color var(--duration-fast) var(--ease-standard);
+  }
+  .carousel__btn:hover {
+    border-color: var(--bc-gold);
+    background: #fdf8ec;
+  }
+  .carousel__count {
+    min-width: 42px;
+    color: var(--color-muted);
+    font-size: 0.875rem;
+    font-weight: 700;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .featured__side {
+    display: grid;
+    grid-template-rows: 1fr 1fr;
+    gap: clamp(16px, 1.8vw, 24px);
+  }
+  .mini-card {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr);
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: #fff;
+    transition: box-shadow var(--duration-base) var(--ease-standard);
+  }
+  .mini-card:hover {
+    box-shadow: var(--shadow-raised);
+  }
+  .mini-card__media {
+    position: relative;
+    min-height: 150px;
+  }
+  .mini-card__media :global(picture),
+  .mini-card__media :global(img) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .mini-card__body {
+    position: relative;
+    padding: 18px 18px 48px;
+  }
+  .mini-card h3 {
+    font-size: 0.975rem;
+    line-height: 1.35;
+  }
+  .mini-card h3 a {
+    color: inherit;
+    text-decoration: none;
+  }
+  .mini-card:hover h3 a {
+    text-decoration: underline;
+    text-underline-offset: 0.18em;
+  }
+  .mini-card__meta {
+    margin-top: 8px;
+    color: var(--color-gold-readable);
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .mini-card__arrow {
+    position: absolute;
+    left: 18px;
+    bottom: 16px;
+    color: var(--color-gold-readable);
+  }
+  .featured__note {
+    margin-top: 18px;
+    color: var(--color-muted);
+    font-size: 0.8125rem;
+  }
+
+  @media (max-width: 1099.98px) {
+    .featured__grid {
+      grid-template-columns: 1fr;
+    }
+    .featured__side {
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: none;
+    }
+  }
+  @media (max-width: 699.98px) {
+    .feature-card {
+      grid-template-columns: 1fr;
+    }
+    .feature-card__media {
+      min-height: 0;
+      aspect-ratio: 16 / 10;
+    }
+    .featured__side {
+      grid-template-columns: 1fr;
+    }
+    .mini-card {
+      grid-template-columns: 1fr;
+    }
+    .mini-card__media {
+      min-height: 0;
+      aspect-ratio: 16 / 9;
+    }
+  }
+</style>

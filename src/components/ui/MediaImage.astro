@@ -1,0 +1,39 @@
+---
+import { Picture } from 'astro:assets';
+import { getMedia } from '../../data/media';
+
+interface Props {
+  name: string;
+  /** Candidate widths; values above the intrinsic width are dropped (never upscale). */
+  widths: number[];
+  sizes: string;
+  class?: string;
+  loading?: 'lazy' | 'eager';
+  fetchpriority?: 'high' | 'low' | 'auto';
+  /** Override the registry alt text. Use '' for decorative images. */
+  alt?: string;
+}
+
+const { name, widths, sizes, class: className, loading = 'lazy', fetchpriority, alt } = Astro.props;
+const item = getMedia(name);
+const intrinsic = item.src.width;
+const usable = [...new Set(widths.map((w) => Math.min(w, intrinsic)))].sort((a, b) => a - b);
+// Generate the <img src> fallback at the largest requested width rather than the original size.
+const fallbackWidth = usable[usable.length - 1] ?? intrinsic;
+---
+
+<Picture
+  src={item.src}
+  width={fallbackWidth}
+  height={Math.round((fallbackWidth / intrinsic) * item.src.height)}
+  widths={usable}
+  sizes={sizes}
+  formats={['avif', 'webp']}
+  fallbackFormat="webp"
+  alt={alt ?? item.alt}
+  loading={loading}
+  decoding="async"
+  fetchpriority={fetchpriority}
+  class={className}
+  data-origin={item.origin}
+/>

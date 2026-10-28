@@ -1,0 +1,376 @@
+---
+import type { GetStaticPaths } from 'astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../../components/ui/PageHero.astro';
+import CtaBand from '../../components/ui/CtaBand.astro';
+import Icon from '../../components/ui/Icon.astro';
+import MediaImage from '../../components/ui/MediaImage.astro';
+import ProjectCard from '../../components/projects/ProjectCard.astro';
+import { formatPeriod, getProjects, getServices, serviceCategoryOf, type Project } from '../../lib/content';
+import { portfolioGroups, sectorShortLabels } from '../../data/site';
+import { breadcrumbJsonLd } from '../../lib/seo';
+
+export const getStaticPaths = (async () => {
+  const projects = await getProjects();
+  return projects.map((project, i) => ({
+    params: { id: project.id },
+    props: { project, prev: projects[i - 1], next: projects[i + 1], all: projects },
+  }));
+}) satisfies GetStaticPaths;
+
+interface Props {
+  project: Project;
+  prev?: Project;
+  next?: Project;
+  all: Project[];
+}
+const { project, prev, next, all } = Astro.props;
+const p = project.data;
+const services = await getServices();
+const projectServices = services.filter((s) => p.services.some((ref) => ref.id === s.id));
+const site = Astro.site ?? new URL('https://blackcrystal.co.zw');
+
+const clientRoot = p.client?.split(' — ')[0];
+const related = all
+  .filter((o) => o.id !== project.id)
+  .map((o) => {
+    let score = 0;
+    if (clientRoot && o.data.client?.startsWith(clientRoot)) score += 5;
+    if (o.data.portfolio === p.portfolio) score += 2;
+    if (o.data.sectors.some((s) => p.sectors.includes(s))) score += 1;
+    return { o, score };
+  })
+  .filter((r) => r.score > 0)
+  .sort((a, b) => b.score - a.score)
+  .slice(0, 3)
+  .map((r) => r.o);
+
+const facts: { label: string; value: string }[] = [
+  ...(p.client ? [{ label: 'Client', value: p.client }] : []),
+  ...(p.partners.length
+    ? [{ label: p.partners.length > 1 ? 'Partners' : 'Partner', value: p.partners.join('; ') }]
+    : []),
+  ...(p.location ? [{ label: 'Location', value: p.location }] : []),
+  ...(p.country ? [{ label: 'Country', value: p.country }] : []),
+  { label: 'Period', value: formatPeriod(p) },
+  { label: 'Deliverable', value: p.deliverable },
+  {
+    label: 'Sector',
+    value: p.sectors.length ? p.sectors.map((s) => sectorShortLabels[s]).join(', ') : 'Cross-sector',
+  },
+  ...(p.standards.length ? [{ label: 'Standards referenced', value: p.standards.join('; ') }] : []),
+];
+const description =
+  p.description.length > 158 ? `${p.description.slice(0, 155).replace(/\s+\S*$/, '')}…` : p.description;
+---
+
+<BaseLayout
+  title={p.title}
+  description={description}
+  jsonLd={breadcrumbJsonLd(site, [
+    { name: 'Home', href: '/' },
+    { name: 'Projects', href: '/projects/' },
+    { name: p.title, href: `/projects/${project.id}/` },
+  ])}
+>
+  <PageHero
+    title={p.title}
+    eyebrow={portfolioGroups[p.portfolio]}
+    image={p.image}
+    size="compact"
+    crumbs={[{ name: 'Projects', href: '/projects/' }]}
+    caption="Illustrative image"
+  />
+
+  <section class="section">
+    <div class="project-layout container container--wide">
+      <article class="project-main">
+        <h2 class="project-main__heading">Documented scope</h2>
+        <p class="project-main__scope">{p.description}</p>
+        <div class="source-note">
+          <Icon name="file-search" size={20} />
+          <p>
+            Source: Black Crystal Company Profile 2024, PDF page {p.source.page}.
+            {p.source.note && <span class="source-note__extra">Editorial note: {p.source.note}</span>}
+          </p>
+        </div>
+
+        <h2 class="project-main__heading">Services involved</h2>
+        <ul class="service-links" role="list">
+          {projectServices.map((s) => (
+            <li>
+              <a href={`/services/${s.id}/`}>
+                <Icon name={s.data.icon} size={22} />
+                <span>{s.data.title}</span>
+                <Icon name="arrow-right" size={18} class="service-links__arrow" />
+              </a>
+            </li>
+          ))}
+        </ul>
+
+        <figure class="project-figure">
+          <div class="project-figure__img">
+            <MediaImage name={p.image} widths={[640, 960, 1280]} sizes="(min-width: 1024px) 60vw, 100vw" />
+          </div>
+          <figcaption>Illustrative image. It does not depict this project or its site.</figcaption>
+        </figure>
+      </article>
+
+      <aside class="project-facts" aria-labelledby="facts-title">
+        <h2 id="facts-title" class="project-facts__title">
+          Project facts
+        </h2>
+        <dl>
+          {facts.map((f) => (
+            <div>
+              <dt>{f.label}</dt>
+              <dd>{f.value}</dd>
+            </div>
+          ))}
+        </dl>
+        <a href="/contact/" class="btn btn--primary btn--sm project-facts__cta">
+          Discuss a similar project <Icon name="arrow-right" />
+        </a>
+      </aside>
+    </div>
+  </section>
+
+  {related.length > 0 && (
+    <section class="section section--warm" aria-labelledby="related-title">
+      <div class="container container--wide">
+        <div class="section-head">
+          <div class="section-head__text">
+            <p class="eyebrow">Related projects</p>
+            <h2 id="related-title">Further documented work</h2>
+          </div>
+          <a href="/projects/" class="link-arrow">
+            All projects <Icon name="arrow-right" />
+          </a>
+        </div>
+        <ul class="related-grid" role="list">
+          {related.map((r) => (
+            <ProjectCard
+              project={r}
+              categories={serviceCategoryOf(
+                services,
+                r.data.services.map((s) => s.id),
+              )}
+              sectorLabels={sectorShortLabels}
+            />
+          ))}
+        </ul>
+      </div>
+    </section>
+  )}
+
+  <nav class="pager container container--wide" aria-label="Project navigation">
+    {prev ? (
+      <a href={`/projects/${prev.id}/`} class="pager__link" rel="prev">
+        <span class="pager__dir">
+          <Icon name="arrow-left" size={16} /> Previous project
+        </span>
+        <span class="pager__title">{prev.data.title}</span>
+      </a>
+    ) : (
+      <span />
+    )}
+    {next && (
+      <a href={`/projects/${next.id}/`} class="pager__link pager__link--next" rel="next">
+        <span class="pager__dir">
+          Next project <Icon name="arrow-right" size={16} />
+        </span>
+        <span class="pager__title">{next.data.title}</span>
+      </a>
+    )}
+  </nav>
+
+  <CtaBand />
+</BaseLayout>
+
+<style>
+  .project-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.7fr) minmax(280px, 1fr);
+    gap: clamp(32px, 5vw, 72px);
+    align-items: start;
+  }
+  .project-main__heading {
+    margin: 0 0 14px;
+    font-size: 1.375rem;
+  }
+  .project-main__heading:not(:first-child) {
+    margin-top: 40px;
+  }
+  .project-main__scope {
+    max-width: 68ch;
+    font-size: 1.125rem;
+    line-height: 1.75;
+  }
+  .source-note {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+    padding: 14px 16px;
+    border-left: 3px solid var(--bc-gold);
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    background: var(--color-surface-warm);
+    color: var(--color-muted);
+    font-size: 0.875rem;
+  }
+  .source-note :global(svg) {
+    flex: none;
+    color: var(--color-gold-readable);
+  }
+  .source-note__extra {
+    display: block;
+    margin-top: 4px;
+  }
+  .service-links {
+    display: grid;
+    gap: 10px;
+  }
+  .service-links a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    color: var(--bc-thunder);
+    font-weight: 700;
+    text-decoration: none;
+    transition: border-color var(--duration-base) var(--ease-standard);
+  }
+  .service-links a:hover {
+    border-color: var(--bc-gold);
+  }
+  .service-links :global(svg) {
+    flex: none;
+    color: var(--bc-green);
+  }
+  .service-links span {
+    flex: 1;
+  }
+  .service-links :global(.service-links__arrow) {
+    color: var(--color-gold-readable);
+  }
+  .project-figure {
+    margin-top: 40px;
+  }
+  .project-figure__img {
+    overflow: hidden;
+    border-radius: var(--radius-lg);
+  }
+  .project-figure__img :global(img) {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+  }
+  .project-figure figcaption {
+    margin-top: 8px;
+    color: var(--color-muted);
+    font-size: 0.8125rem;
+  }
+  .project-facts {
+    position: sticky;
+    top: calc(var(--header-h) + 24px);
+    padding: 24px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: #fff;
+    box-shadow: var(--shadow-subtle);
+  }
+  .project-facts__title {
+    margin-bottom: 14px;
+    font-size: 1.125rem;
+  }
+  .project-facts dl {
+    display: grid;
+  }
+  .project-facts dl div {
+    display: grid;
+    gap: 2px;
+    padding: 11px 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .project-facts dt {
+    color: var(--color-muted);
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .project-facts dd {
+    margin: 0;
+    font-weight: 650;
+    line-height: 1.45;
+  }
+  .project-facts__cta {
+    width: 100%;
+    margin-top: 20px;
+  }
+  .related-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+  }
+  .pager {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    padding-block: 40px;
+  }
+  .pager__link {
+    display: grid;
+    gap: 6px;
+    padding: 18px 20px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    color: var(--bc-thunder);
+    text-decoration: none;
+  }
+  .pager__link:hover {
+    border-color: var(--bc-gold);
+  }
+  .pager__link--next {
+    text-align: right;
+  }
+  .pager__dir {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--color-gold-readable);
+    font-size: 0.8125rem;
+    font-weight: 800;
+  }
+  .pager__link--next .pager__dir {
+    justify-content: flex-end;
+  }
+  .pager__title {
+    font-weight: 700;
+    line-height: 1.35;
+  }
+  @media (max-width: 1023.98px) {
+    .project-layout {
+      grid-template-columns: 1fr;
+    }
+    .project-facts {
+      position: static;
+      grid-row: 1;
+    }
+    .related-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  @media (max-width: 599.98px) {
+    .pager {
+      grid-template-columns: 1fr;
+    }
+    .pager__link--next {
+      text-align: left;
+    }
+    .pager__link--next .pager__dir {
+      justify-content: flex-start;
+    }
+  }
+</style>

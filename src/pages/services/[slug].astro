@@ -1,0 +1,243 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../../components/ui/PageHero.astro';
+import CtaBand from '../../components/ui/CtaBand.astro';
+import Icon from '../../components/ui/Icon.astro';
+import ProjectCard from '../../components/projects/ProjectCard.astro';
+import { getProjects, getSectors, getServices, serviceCategoryOf, type Service } from '../../lib/content';
+import { sectorShortLabels, serviceCategories } from '../../data/site';
+import { breadcrumbJsonLd, serviceJsonLd } from '../../lib/seo';
+
+export const getStaticPaths = (async () => {
+  const services = await getServices();
+  return services.map((service) => ({ params: { slug: service.id }, props: { service } }));
+}) satisfies GetStaticPaths;
+
+interface Props {
+  service: Service;
+}
+const { service } = Astro.props;
+const { Content } = await render(service);
+const s = service.data;
+const category = serviceCategories.find((c) => c.id === s.category)!;
+const allServices = await getServices();
+const siblings = allServices.filter((o) => o.data.category === s.category && o.id !== service.id);
+const sectors = (await getSectors()).filter((sec) =>
+  s.sectors.includes(sec.id as (typeof s.sectors)[number]),
+);
+const projects = (await getProjects()).filter((p) => p.data.services.some((ref) => ref.id === service.id));
+const shown = projects.slice(0, 6);
+const countSentence =
+  projects.length === 1
+    ? '1 assignment in our 2024 company profile involves this service.'
+    : `${projects.length} assignments in our 2024 company profile involve this service.`;
+const site = Astro.site ?? new URL('https://blackcrystal.co.zw');
+const path = `/services/${service.id}/`;
+---
+
+<BaseLayout
+  title={s.title}
+  description={s.seoDescription}
+  jsonLd={[
+    serviceJsonLd(site, s.title, s.seoDescription, path),
+    breadcrumbJsonLd(site, [
+      { name: 'Home', href: '/' },
+      { name: 'Services', href: '/services/' },
+      { name: s.title, href: path },
+    ]),
+  ]}
+>
+  <PageHero
+    title={s.title}
+    eyebrow={category.title}
+    lead={s.summary}
+    image={s.image}
+    crumbs={[{ name: 'Services', href: '/services/' }]}
+  />
+
+  <section class="section">
+    <div class="detail container container--wide">
+      <article class="prose">
+        <Content />
+      </article>
+      <aside class="detail__aside">
+        {s.profileListing.length > 0 && (
+          <div class="aside-card">
+            <h2 class="aside-card__title">As listed in our company profile</h2>
+            <ul role="list" class="aside-list">
+              {s.profileListing.map((line) => (
+                <li>
+                  <Icon name="check-circle" size={18} />
+                  {line}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+        {sectors.length > 0 && (
+          <div class="aside-card">
+            <h2 class="aside-card__title">Relevant sectors</h2>
+            <ul role="list" class="aside-links">
+              {sectors.map((sec) => (
+                <li>
+                  <a href={`/sectors/${sec.id}/`}>
+                    <Icon name={sec.data.icon} size={18} />
+                    {sec.data.title}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+        {siblings.length > 0 && (
+          <div class="aside-card">
+            <h2 class="aside-card__title">More in {category.title}</h2>
+            <ul role="list" class="aside-links">
+              {siblings.map((o) => (
+                <li>
+                  <a href={`/services/${o.id}/`}>
+                    <Icon name={o.data.icon} size={18} />
+                    {o.data.title}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </aside>
+    </div>
+  </section>
+
+  <section class="section section--warm" aria-labelledby="documented-title">
+    <div class="container container--wide">
+      <div class="section-head">
+        <div class="section-head__text">
+          <p class="eyebrow">Documented projects</p>
+          <h2 id="documented-title">{s.shortTitle} in practice</h2>
+          {projects.length > 0 ? (
+            <p>{countSentence}</p>
+          ) : (
+            <p>
+              No assignments for this service are itemised in the project list of our 2024 company profile.
+              Contact us to discuss your requirements.
+            </p>
+          )}
+        </div>
+        {projects.length > shown.length && (
+          <a href={`/projects/?service=${service.id}`} class="link-arrow">
+            View all {projects.length} <Icon name="arrow-right" />
+          </a>
+        )}
+      </div>
+      {shown.length > 0 && (
+        <ul class="project-grid" role="list">
+          {shown.map((project) => (
+            <ProjectCard
+              project={project}
+              categories={serviceCategoryOf(
+                allServices,
+                project.data.services.map((r) => r.id),
+              )}
+              sectorLabels={sectorShortLabels}
+            />
+          ))}
+        </ul>
+      )}
+    </div>
+  </section>
+
+  <CtaBand
+    title={`Need ${s.shortTitle.toLowerCase().startsWith('esia') ? 'an ESIA' : 'support with ' + s.shortTitle.toLowerCase()}?`}
+  />
+</BaseLayout>
+
+<style>
+  .detail {
+    display: grid;
+    grid-template-columns: minmax(0, 1.7fr) minmax(280px, 1fr);
+    gap: clamp(32px, 5vw, 80px);
+    align-items: start;
+  }
+  .detail__aside {
+    display: grid;
+    gap: 16px;
+    position: sticky;
+    top: calc(var(--header-h) + 24px);
+  }
+  .aside-card {
+    padding: 22px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: #fff;
+  }
+  .aside-card__title {
+    margin-bottom: 12px;
+    color: var(--color-gold-readable);
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .aside-list {
+    display: grid;
+    gap: 10px;
+  }
+  .aside-list li {
+    display: flex;
+    gap: 10px;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+  }
+  .aside-list :global(svg) {
+    flex: none;
+    margin-top: 2px;
+    color: var(--bc-green);
+  }
+  .aside-links {
+    display: grid;
+  }
+  .aside-links a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 44px;
+    border-bottom: 1px solid var(--color-border);
+    color: var(--bc-thunder);
+    font-size: 0.9375rem;
+    font-weight: 650;
+    text-decoration: none;
+  }
+  .aside-links li:last-child a {
+    border-bottom: 0;
+  }
+  .aside-links a:hover {
+    color: var(--color-gold-readable);
+  }
+  .aside-links :global(svg) {
+    flex: none;
+    color: var(--bc-green);
+  }
+  .project-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+  }
+  @media (max-width: 1023.98px) {
+    .detail {
+      grid-template-columns: 1fr;
+    }
+    .detail__aside {
+      position: static;
+    }
+    .project-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (max-width: 599.98px) {
+    .project-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

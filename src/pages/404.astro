@@ -1,0 +1,91 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from '../components/ui/Icon.astro';
+import Contours from '../components/ui/Contours.astro';
+---
+
+<BaseLayout title="Page not found" description="The page you were looking for could not be found." noindex>
+  <section class="not-found on-dark">
+    <Contours class="not-found__contours" rings={11} />
+    <div class="container container--narrow">
+      <p class="eyebrow">Error 404</p>
+      <h1>This page could not be found.</h1>
+      <p class="not-found__lead">
+        The page may have moved as part of our new website. Try one of these sections, or use search.
+      </p>
+      <ul role="list" class="not-found__links">
+        <li>
+          <a href="/">
+            Home <Icon name="arrow-right" size={18} />
+          </a>
+        </li>
+        <li>
+          <a href="/services/">
+            Services <Icon name="arrow-right" size={18} />
+          </a>
+        </li>
+        <li>
+          <a href="/sectors/">
+            Sectors <Icon name="arrow-right" size={18} />
+          </a>
+        </li>
+        <li>
+          <a href="/projects/">
+            Projects <Icon name="arrow-right" size={18} />
+          </a>
+        </li>
+        <li>
+          <a href="/contact/">
+            Contact <Icon name="arrow-right" size={18} />
+          </a>
+        </li>
+      </ul>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .not-found {
+    position: relative;
+    overflow: hidden;
+    padding-block: clamp(80px, 12vw, 160px);
+    background: linear-gradient(140deg, #2f4a36 0%, var(--color-panel) 45%, var(--color-panel-deep) 100%);
+    isolation: isolate;
+  }
+  :global(.not-found__contours) {
+    position: absolute;
+    right: -10%;
+    top: -20%;
+    width: min(70vw, 760px);
+    color: #c6962c;
+    opacity: 0.18;
+    z-index: -1;
+  }
+  .not-found__lead {
+    margin-top: 16px;
+    color: var(--color-on-dark-muted);
+    font-size: 1.125rem;
+  }
+  .not-found__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 32px;
+  }
+  .not-found__links a {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 8px 16px;
+    border: 1px solid rgb(255 255 255 / 40%);
+    border-radius: var(--radius-sm);
+    color: #fff;
+    font-weight: 700;
+    text-decoration: none;
+  }
+  .not-found__links a:hover {
+    border-color: var(--bc-gold);
+    background: rgb(255 255 255 / 8%);
+  }
+</style>

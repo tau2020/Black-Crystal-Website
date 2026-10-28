@@ -1,0 +1,49 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../../components/ui/PageHero.astro';
+import Icon from '../../components/ui/Icon.astro';
+---
+
+<BaseLayout
+  title="Enquiry sent"
+  description="Your enquiry has been sent to Black Crystal Consulting."
+  noindex
+>
+  <PageHero
+    title="Thank you — your enquiry has been sent"
+    eyebrow="Contact"
+    size="compact"
+    crumbs={[{ name: 'Contact', href: '/contact/' }]}
+  />
+  <section class="section">
+    <div class="container container--narrow outcome">
+      <Icon name="check-circle" size={44} strokeWidth={1.5} />
+      <p>
+        Our team has received your message<span data-ref></span>. We will reply to the email address you
+        provided.
+      </p>
+      <p>
+        <a href="/" class="link-arrow">
+          Back to the homepage <Icon name="arrow-right" />
+        </a>
+      </p>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  const ref = new URLSearchParams(location.search).get('ref');
+  const holder = document.querySelector('[data-ref]');
+  if (holder && ref && /^BC-\d{8}-[0-9A-F]{6}$/.test(ref)) holder.textContent = ` (reference ${ref})`;
+</script>
+
+<style>
+  .outcome {
+    display: grid;
+    gap: 16px;
+    font-size: 1.125rem;
+  }
+  .outcome :global(svg) {
+    color: var(--color-green-readable);
+  }
+</style>

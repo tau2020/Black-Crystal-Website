@@ -1,0 +1,317 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../../components/ui/PageHero.astro';
+import CtaBand from '../../components/ui/CtaBand.astro';
+import Icon from '../../components/ui/Icon.astro';
+import MediaImage from '../../components/ui/MediaImage.astro';
+import { getProjects, getServicesByCategory } from '../../lib/content';
+import { about } from '../../data/site';
+import { breadcrumbJsonLd } from '../../lib/seo';
+
+const groups = await getServicesByCategory();
+const projects = await getProjects();
+const projectCount = (id: string) => projects.filter((p) => p.data.services.some((s) => s.id === id)).length;
+const site = Astro.site ?? new URL('https://blackcrystal.co.zw');
+
+const approach = [
+  {
+    title: 'Understand the project',
+    text: 'We start with the development itself — its design, location, timeline and the decisions it needs to support.',
+  },
+  {
+    title: 'Assemble the right team',
+    text: 'We draw on a pool of established specialist sub-consultants to form multidisciplinary teams for each assignment.',
+  },
+  {
+    title: 'Assess and engage',
+    text: 'Baseline studies, specialist assessments and stakeholder engagement build an evidence-based picture of risks and opportunities.',
+  },
+  {
+    title: 'Recommend practical measures',
+    text: 'Findings become clear, implementable management and monitoring measures aligned with the applicable requirements.',
+  },
+];
+---
+
+<BaseLayout
+  title="Services"
+  description="Environmental and social impact assessment, auditing, ecological, heritage, social risk, soils, GIS, mine closure, training and sustainability advisory services."
+  jsonLd={breadcrumbJsonLd(site, [
+    { name: 'Home', href: '/' },
+    { name: 'Services', href: '/services/' },
+  ])}
+>
+  <PageHero
+    title="Expert environmental, social and heritage advisory"
+    eyebrow="Services"
+    lead="From the first screening of a site to monitoring during operation, we help organisations understand and manage the environmental, social and cultural heritage dimensions of development."
+    image="profile-leaves"
+  />
+
+  <nav class="jump container container--wide" aria-label="Service categories">
+    <ul role="list">
+      {groups.map(({ category }) => (
+        <li>
+          <a href={`#${category.id}`}>
+            <Icon name={category.icon} size={20} />
+            {category.title}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+
+  {groups.map(({ category, services }, i) => (
+    <section
+      class:list={['category section', { 'section--warm': i % 2 === 1 }]}
+      id={category.id}
+      aria-labelledby={`${category.id}-title`}
+    >
+      <div class="category__grid container container--wide">
+        <div class="category__intro" data-reveal>
+          <span class="category__icon">
+            <Icon name={category.icon} size={30} strokeWidth={1.5} />
+          </span>
+          <h2 id={`${category.id}-title`}>{category.title}</h2>
+          <p>{category.summary}</p>
+          <div class="category__media organic-tall">
+            <MediaImage
+              name={category.image}
+              widths={[400, 600, 860]}
+              sizes="(min-width: 1024px) 28vw, 90vw"
+              alt=""
+            />
+          </div>
+        </div>
+        <ul class="discipline-grid" role="list">
+          {services.map((s) => (
+            <li class="discipline card-link">
+              <Icon name={s.data.icon} size={26} strokeWidth={1.5} class="discipline__icon" />
+              <h3>
+                <a class="stretched" href={`/services/${s.id}/`}>
+                  {s.data.title}
+                </a>
+              </h3>
+              <p>{s.data.summary}</p>
+              <p class="discipline__meta">
+                {projectCount(s.id) > 0
+                  ? `${projectCount(s.id)} documented project${projectCount(s.id) === 1 ? '' : 's'}`
+                  : 'Listed service'}
+                <Icon name="arrow-right" size={16} />
+              </p>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  ))}
+
+  <section class="approach section on-dark" aria-labelledby="approach-title">
+    <div class="container container--wide">
+      <div class="section-head">
+        <div class="section-head__text">
+          <p class="eyebrow">How we work</p>
+          <h2 id="approach-title">Multidisciplinary by design.</h2>
+          <p>{about.teams}</p>
+        </div>
+      </div>
+      <ol class="approach__steps" role="list">
+        {approach.map((step, i) => (
+          <li>
+            <span class="approach__num" aria-hidden="true">
+              {String(i + 1).padStart(2, '0')}
+            </span>
+            <h3>{step.title}</h3>
+            <p>{step.text}</p>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <CtaBand />
+</BaseLayout>
+
+<style>
+  .jump {
+    margin-top: -28px;
+    position: relative;
+    z-index: 2;
+  }
+  .jump ul {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: #fff;
+    box-shadow: var(--shadow-raised);
+  }
+  .jump li + li {
+    border-left: 1px solid var(--color-border);
+  }
+  .jump a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 64px;
+    padding: 12px 20px;
+    color: var(--bc-thunder);
+    font-weight: 750;
+    text-decoration: none;
+  }
+  .jump a:hover {
+    background: var(--color-surface-warm);
+  }
+  .jump :global(svg) {
+    flex: none;
+    color: var(--bc-green);
+  }
+  .category__grid {
+    display: grid;
+    grid-template-columns: minmax(260px, 0.9fr) minmax(0, 2fr);
+    gap: clamp(28px, 4vw, 64px);
+    align-items: start;
+  }
+  .category__intro {
+    position: sticky;
+    top: calc(var(--header-h) + 24px);
+  }
+  .category__icon {
+    display: inline-grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    margin-bottom: 18px;
+    border-radius: 50%;
+    background: #eef2ea;
+    color: var(--color-green-readable);
+  }
+  .category__intro h2 {
+    font-size: clamp(1.8rem, 2.6vw, 2.5rem);
+  }
+  .category__intro > p {
+    margin-top: 12px;
+    color: var(--color-muted);
+  }
+  .category__media {
+    margin-top: 24px;
+  }
+  .category__media :global(img) {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+  }
+  .discipline-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+  .discipline {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 24px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: #fff;
+    transition: box-shadow var(--duration-base) var(--ease-standard);
+  }
+  .discipline:hover {
+    box-shadow: var(--shadow-raised);
+  }
+  :global(.discipline__icon) {
+    color: var(--bc-gold);
+  }
+  .discipline h3 {
+    font-size: 1.125rem;
+  }
+  .discipline h3 a {
+    color: inherit;
+    text-decoration: none;
+  }
+  .discipline:hover h3 a {
+    text-decoration: underline;
+    text-underline-offset: 0.18em;
+  }
+  .discipline p {
+    color: var(--color-muted);
+    font-size: 0.9375rem;
+  }
+  .discipline .discipline__meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: auto;
+    padding-top: 6px;
+    color: var(--color-gold-readable);
+    font-size: 0.8125rem;
+    font-weight: 800;
+  }
+  .approach {
+    background: var(--color-night);
+  }
+  .approach .section-head__text p {
+    color: var(--color-on-dark-muted);
+  }
+  .approach__steps {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+  }
+  .approach__steps li {
+    padding: 24px;
+    border: 1px solid rgb(255 255 255 / 12%);
+    border-radius: var(--radius-lg);
+    background: rgb(255 255 255 / 3%);
+  }
+  .approach__num {
+    display: block;
+    margin-bottom: 14px;
+    color: var(--color-gold-on-dark);
+    font-size: 1.75rem;
+    font-weight: 850;
+  }
+  .approach__steps h3 {
+    margin-bottom: 8px;
+    font-size: 1.125rem;
+  }
+  .approach__steps p {
+    color: var(--color-on-dark-muted);
+    font-size: 0.9375rem;
+  }
+  @media (max-width: 1023.98px) {
+    .jump ul {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .jump li:nth-child(3) {
+      border-left: 0;
+    }
+    .jump li:nth-child(n + 3) {
+      border-top: 1px solid var(--color-border);
+    }
+    .category__grid {
+      grid-template-columns: 1fr;
+    }
+    .category__intro {
+      position: static;
+    }
+    .category__media {
+      display: none;
+    }
+    .approach__steps {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (max-width: 599.98px) {
+    .jump ul,
+    .discipline-grid,
+    .approach__steps {
+      grid-template-columns: 1fr;
+    }
+    .jump li + li {
+      border-left: 0;
+      border-top: 1px solid var(--color-border);
+    }
+  }
+</style>

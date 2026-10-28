@@ -1,0 +1,266 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../../components/ui/PageHero.astro';
+import CtaBand from '../../components/ui/CtaBand.astro';
+import Icon from '../../components/ui/Icon.astro';
+import MediaImage from '../../components/ui/MediaImage.astro';
+import { formatDate, getInsights, insightCategoryLabels, showDrafts } from '../../lib/content';
+import { breadcrumbJsonLd } from '../../lib/seo';
+
+const insights = await getInsights();
+const reviewMode = showDrafts();
+const categories = [...new Set(insights.map((i) => i.data.category))];
+const site = Astro.site ?? new URL('https://blackcrystal.co.zw');
+---
+
+<BaseLayout
+  title="Insights"
+  description="Perspectives on environmental and social impact assessment, biodiversity, cultural heritage, renewable energy and responsible development from Black Crystal."
+  jsonLd={breadcrumbJsonLd(site, [
+    { name: 'Home', href: '/' },
+    { name: 'Insights', href: '/insights/' },
+  ])}
+>
+  <PageHero
+    title="Insights"
+    eyebrow="Knowledge & perspectives"
+    lead="Practical perspectives on environmental and social assessment, conservation, heritage and responsible development, grounded in our documented project experience."
+    image="profile-eland"
+  />
+
+  <section class="section">
+    <div class="container container--wide">
+      {reviewMode && insights.some((i) => i.data.status === 'draft') && (
+        <div class="review-banner" role="note">
+          <Icon name="info" size={20} />
+          <p>
+            <strong>Review build.</strong> Articles marked <span class="badge-draft">Draft</span> are shown
+            for owner review only. They carry no publication date or author and are excluded from production
+            builds until approved.
+          </p>
+        </div>
+      )}
+
+      {insights.length > 0 ? (
+        <>
+          {categories.length > 1 && (
+            <div class="topic-filter" data-topic-filter hidden>
+              <span class="topic-filter__label" id="topic-label">
+                Filter by topic
+              </span>
+              <div class="topic-filter__chips" role="group" aria-labelledby="topic-label">
+                <button type="button" class="chip is-active" data-topic="" aria-pressed="true">
+                  All topics
+                </button>
+                {categories.map((c) => (
+                  <button type="button" class="chip" data-topic={c} aria-pressed="false">
+                    {insightCategoryLabels[c]}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+          <ul class="insight-list" role="list" data-insight-list>
+            {insights.map((item) => (
+              <li class="insight card-link" data-topic-item={item.data.category}>
+                <div class="insight__media media-zoom">
+                  <MediaImage
+                    name={item.data.image}
+                    widths={[400, 600, 800]}
+                    sizes="(min-width: 1100px) 30vw, (min-width: 700px) 45vw, 100vw"
+                    alt=""
+                  />
+                </div>
+                <div class="insight__body">
+                  <p class="insight__meta">
+                    {item.data.status === 'draft' && <span class="badge-draft">Draft</span>}
+                    <span>{insightCategoryLabels[item.data.category]}</span>
+                    {item.data.readingMinutes && (
+                      <span class="insight__time">{item.data.readingMinutes} min read</span>
+                    )}
+                  </p>
+                  <h2>
+                    <a class="stretched" href={`/insights/${item.id}/`}>
+                      {item.data.title}
+                    </a>
+                  </h2>
+                  <p class="insight__summary">{item.data.summary}</p>
+                  {item.data.status === 'approved' && item.data.publishedDate && (
+                    <p class="insight__date">
+                      <time datetime={item.data.publishedDate.toISOString()}>
+                        {formatDate(item.data.publishedDate)}
+                      </time>
+                      {item.data.author && <> · {item.data.author}</>}
+                    </p>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ul>
+        </>
+      ) : (
+        <div class="empty">
+          <h2>Insights are on their way</h2>
+          <p>
+            We are preparing articles drawn from our project experience. In the meantime, explore our{' '}
+            <a href="/services/">services</a> and <a href="/projects/">documented projects</a>.
+          </p>
+        </div>
+      )}
+    </div>
+  </section>
+
+  <CtaBand />
+</BaseLayout>
+
+<script>
+  const filter = document.querySelector<HTMLElement>('[data-topic-filter]');
+  const items = [...document.querySelectorAll<HTMLElement>('[data-topic-item]')];
+  if (filter && items.length) {
+    filter.hidden = false;
+    const buttons = [...filter.querySelectorAll<HTMLButtonElement>('[data-topic]')];
+    filter.addEventListener('click', (event) => {
+      const button = (event.target as HTMLElement).closest<HTMLButtonElement>('[data-topic]');
+      if (!button) return;
+      const topic = button.dataset.topic;
+      for (const b of buttons) {
+        const active = b === button;
+        b.classList.toggle('is-active', active);
+        b.setAttribute('aria-pressed', String(active));
+      }
+      for (const item of items) item.hidden = !!topic && item.dataset.topicItem !== topic;
+    });
+  }
+</script>
+
+<style>
+  .review-banner {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 28px;
+    padding: 16px 18px;
+    border: 1px solid #ecd39c;
+    border-radius: var(--radius-md);
+    background: #fffaf0;
+    font-size: 0.9375rem;
+  }
+  .review-banner :global(svg) {
+    flex: none;
+    color: #8a6416;
+  }
+  .topic-filter {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px 16px;
+    margin-bottom: 28px;
+  }
+  .topic-filter__label {
+    font-size: 0.875rem;
+    font-weight: 800;
+  }
+  .topic-filter__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .topic-filter .chip {
+    min-height: 40px;
+    padding-inline: 14px;
+    cursor: pointer;
+  }
+  .topic-filter .chip.is-active {
+    border-color: var(--bc-thunder);
+    background: var(--bc-thunder);
+    color: #fff;
+  }
+  .insight-list {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: clamp(16px, 2vw, 24px);
+  }
+  .insight-list :global([hidden]) {
+    display: none;
+  }
+  .insight {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: #fff;
+    transition: box-shadow var(--duration-base) var(--ease-standard);
+  }
+  .insight:hover {
+    box-shadow: var(--shadow-raised);
+  }
+  .insight__media :global(img) {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+  }
+  .insight__body {
+    display: grid;
+    gap: 10px;
+    padding: 20px 22px 24px;
+  }
+  .insight__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 10px;
+    color: var(--color-gold-readable);
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .insight__time {
+    color: var(--color-muted);
+    font-weight: 700;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+  .insight h2 {
+    font-size: 1.2rem;
+    line-height: 1.32;
+  }
+  .insight h2 a {
+    color: inherit;
+    text-decoration: none;
+  }
+  .insight:hover h2 a {
+    text-decoration: underline;
+    text-underline-offset: 0.18em;
+  }
+  .insight__summary,
+  .insight__date {
+    color: var(--color-muted);
+    font-size: 0.9375rem;
+  }
+  .empty {
+    padding: 48px;
+    border: 1px dashed var(--color-border-strong);
+    border-radius: var(--radius-lg);
+    text-align: center;
+  }
+  .empty p {
+    max-width: 56ch;
+    margin: 12px auto 0;
+    color: var(--color-muted);
+  }
+  .empty a {
+    color: var(--color-gold-readable);
+    font-weight: 700;
+  }
+  @media (max-width: 1023.98px) {
+    .insight-list {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (max-width: 649.98px) {
+    .insight-list {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

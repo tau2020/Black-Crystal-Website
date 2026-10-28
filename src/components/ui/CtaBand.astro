@@ -1,0 +1,99 @@
+---
+import Icon from './Icon.astro';
+import Contours from './Contours.astro';
+import { contact } from '../../data/site';
+
+interface Props {
+  title?: string;
+  text?: string;
+}
+const {
+  title = 'Planning a development? Talk to us early.',
+  text = 'The earlier environmental, social and heritage considerations shape a project, the more options remain open. Tell us about your project and timeline.',
+} = Astro.props;
+---
+
+<section class="cta-band on-dark" aria-labelledby="cta-band-title">
+  <Contours class="cta-band__contours" rings={8} />
+  <div class="cta-band__inner container container--wide">
+    <div>
+      <p class="eyebrow">Work with us</p>
+      <h2 id="cta-band-title">{title}</h2>
+      <p class="cta-band__text">{text}</p>
+    </div>
+    <div class="cta-band__actions">
+      <a href="/contact/" class="btn btn--primary">
+        Discuss your project <Icon name="arrow-right" />
+      </a>
+      <a href={`mailto:${contact.email}`} class="cta-band__link">
+        <Icon name="mail" size={18} />
+        {contact.email}
+      </a>
+      <a href={contact.phones[0].href} class="cta-band__link">
+        <Icon name="phone" size={18} />
+        {contact.phones[0].label}
+      </a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .cta-band {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, #2f4a36 0%, var(--color-panel) 50%, var(--color-panel-deep) 100%);
+    isolation: isolate;
+  }
+  :global(.cta-band__contours) {
+    position: absolute;
+    left: -6%;
+    bottom: -60%;
+    width: min(55vw, 640px);
+    color: #c6962c;
+    opacity: 0.16;
+    z-index: -1;
+  }
+  .cta-band__inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    gap: 28px 64px;
+    align-items: center;
+    padding-block: clamp(48px, 6vw, 80px);
+  }
+  .cta-band h2 {
+    max-width: 22ch;
+    font-size: clamp(1.8rem, 2.8vw, 2.6rem);
+  }
+  .cta-band__text {
+    max-width: 56ch;
+    margin-top: 14px;
+    color: var(--color-on-dark-muted);
+  }
+  .cta-band__actions {
+    display: grid;
+    justify-items: start;
+    gap: 10px;
+  }
+  .cta-band__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 40px;
+    color: #fff;
+    font-weight: 600;
+    text-decoration: none;
+    word-break: break-word;
+  }
+  .cta-band__link:hover {
+    text-decoration: underline;
+  }
+  .cta-band__link :global(svg) {
+    color: var(--color-gold-on-dark);
+    flex: none;
+  }
+  @media (max-width: 899.98px) {
+    .cta-band__inner {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

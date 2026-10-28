@@ -1,0 +1,179 @@
+---
+import Icon from '../ui/Icon.astro';
+import MediaImage from '../ui/MediaImage.astro';
+import { formatDate, getInsights, insightCategoryLabels } from '../../lib/content';
+
+const insights = (await getInsights()).slice(0, 4);
+
+// Shown only when no insight has been approved and drafts are not being previewed.
+const knowledgeAreas = [
+  {
+    title: 'Environmental & Social Impact Assessment',
+    href: '/services/environmental-social-impact-assessment/',
+    image: 'insight-river',
+  },
+  {
+    title: 'Biodiversity & ecological surveys',
+    href: '/services/biodiversity-ecological-surveys/',
+    image: 'insight-leaves',
+  },
+  {
+    title: 'Archaeological & cultural heritage',
+    href: '/services/archaeological-cultural-heritage/',
+    image: 'insight-heritage',
+  },
+  { title: 'Renewable energy assessments', href: '/sectors/energy/', image: 'insight-wind' },
+];
+---
+
+<section class="insights-home section" aria-labelledby="insights-home-title">
+  <div class="container container--wide">
+    <div class="section-head" data-reveal>
+      <div class="section-head__text">
+        <p class="eyebrow">Latest insights</p>
+        <h2 id="insights-home-title" class="insights-home__title">
+          {insights.length ? 'Perspectives from the field.' : 'Areas of expertise.'}
+        </h2>
+      </div>
+      <a href="/insights/" class="link-arrow">
+        View All Insights <Icon name="arrow-right" />
+      </a>
+    </div>
+    <ul class="insight-grid" role="list">
+      {insights.length
+        ? insights.map((item, i) => (
+            <li class="insight-card card-link" data-reveal data-reveal-step={String(i)}>
+              <div class="insight-card__media media-zoom">
+                <MediaImage
+                  name={item.data.image}
+                  widths={[360, 520, 720]}
+                  sizes="(min-width: 1100px) 22vw, (min-width: 600px) 45vw, 100vw"
+                  alt=""
+                />
+              </div>
+              <div class="insight-card__body">
+                <p class="insight-card__meta">
+                  {item.data.status === 'draft' && <span class="badge-draft">Draft</span>}
+                  <span>{insightCategoryLabels[item.data.category]}</span>
+                </p>
+                <h3>
+                  <a class="stretched" href={`/insights/${item.id}/`}>
+                    {item.data.title}
+                  </a>
+                </h3>
+                {item.data.status === 'approved' && item.data.publishedDate && (
+                  <p class="insight-card__date">
+                    <time datetime={item.data.publishedDate.toISOString()}>
+                      {formatDate(item.data.publishedDate)}
+                    </time>
+                  </p>
+                )}
+                <span class="insight-card__arrow" aria-hidden="true">
+                  <Icon name="arrow-right" size={18} />
+                </span>
+              </div>
+            </li>
+          ))
+        : knowledgeAreas.map((area, i) => (
+            <li class="insight-card card-link" data-reveal data-reveal-step={String(i)}>
+              <div class="insight-card__media media-zoom">
+                <MediaImage
+                  name={area.image}
+                  widths={[360, 520, 720]}
+                  sizes="(min-width: 1100px) 22vw, 45vw"
+                  alt=""
+                />
+              </div>
+              <div class="insight-card__body">
+                <h3>
+                  <a class="stretched" href={area.href}>
+                    {area.title}
+                  </a>
+                </h3>
+                <span class="insight-card__arrow" aria-hidden="true">
+                  <Icon name="arrow-right" size={18} />
+                </span>
+              </div>
+            </li>
+          ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .insights-home__title {
+    font-size: clamp(1.6rem, 2.3vw, 2.25rem);
+  }
+  .insight-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: clamp(14px, 1.6vw, 22px);
+  }
+  .insight-card {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: #fff;
+    transition: box-shadow var(--duration-base) var(--ease-standard);
+  }
+  .insight-card:hover {
+    box-shadow: var(--shadow-raised);
+  }
+  .insight-card__media :global(img) {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+  }
+  .insight-card__body {
+    position: relative;
+    flex: 1;
+    padding: 16px 18px 48px;
+  }
+  .insight-card__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    color: var(--color-gold-readable);
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .insight-card h3 {
+    font-size: 1rem;
+    line-height: 1.38;
+  }
+  .insight-card h3 a {
+    color: inherit;
+    text-decoration: none;
+  }
+  .insight-card:hover h3 a {
+    text-decoration: underline;
+    text-underline-offset: 0.18em;
+  }
+  .insight-card__date {
+    margin-top: 8px;
+    color: var(--color-muted);
+    font-size: 0.8125rem;
+  }
+  .insight-card__arrow {
+    position: absolute;
+    right: 18px;
+    bottom: 16px;
+    color: var(--color-gold-readable);
+  }
+  @media (max-width: 1099.98px) {
+    .insight-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (max-width: 599.98px) {
+    .insight-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

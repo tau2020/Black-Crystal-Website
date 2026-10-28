@@ -1,0 +1,32 @@
+---
+// Homepage — approved section order (design.md §8):
+// 1 navbar (layout) · 2 hero · 3 credibility · 4 sectors · 5 about/zebras · 6 dark-green specialist panel
+// 7 service cards · 8 featured projects · 9 insights · 10 scenic footer (layout)
+import BaseLayout from '../layouts/BaseLayout.astro';
+import HomeHero from '../components/home/HomeHero.astro';
+import CredibilityBand from '../components/home/CredibilityBand.astro';
+import SectorGallery from '../components/home/SectorGallery.astro';
+import AboutIntro from '../components/home/AboutIntro.astro';
+import SpecialistPanel from '../components/home/SpecialistPanel.astro';
+import ServiceCards from '../components/home/ServiceCards.astro';
+import FeaturedProjects from '../components/home/FeaturedProjects.astro';
+import InsightsGrid from '../components/home/InsightsGrid.astro';
+import { websiteJsonLd } from '../lib/seo';
+
+const site = Astro.site ?? new URL('https://blackcrystal.co.zw');
+---
+
+<BaseLayout
+  title="Black Crystal Consulting | Environmental & Social Advisory"
+  description="Environmental, social and cultural heritage advisory since 2005. ESIAs, audits, ecological, heritage and social risk assessments across Zimbabwe and South Africa."
+  jsonLd={websiteJsonLd(site)}
+>
+  <HomeHero />
+  <CredibilityBand />
+  <SectorGallery />
+  <AboutIntro />
+  <SpecialistPanel />
+  <ServiceCards />
+  <FeaturedProjects />
+  <InsightsGrid />
+</BaseLayout>

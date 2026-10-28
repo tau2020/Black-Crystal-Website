@@ -1,0 +1,335 @@
+---
+import Icon from '../ui/Icon.astro';
+import { getServicesByCategory } from '../../lib/content';
+import { contact } from '../../data/site';
+import { LIMITS } from '../../lib/contact/validate';
+
+const groups = await getServicesByCategory();
+---
+
+<div class="contact-form-wrap">
+  <form
+    class="contact-form"
+    method="post"
+    action="/api/contact"
+    novalidate
+    data-contact-form
+    data-email={contact.email}
+    data-phone={contact.phones[0].label}
+  >
+    <div class="form-alert" data-form-alert tabindex="-1" hidden></div>
+
+    <div class="form-grid">
+      <div class="field">
+        <label for="fullName">
+          Full name <span class="req">Required</span>
+        </label>
+        <input
+          id="fullName"
+          name="fullName"
+          type="text"
+          autocomplete="name"
+          required
+          maxlength={LIMITS.fullName.max}
+          aria-describedby="fullName-error"
+        />
+        <p class="field__error" id="fullName-error" data-error-for="fullName" hidden></p>
+      </div>
+
+      <div class="field">
+        <label for="email">
+          Email <span class="req">Required</span>
+        </label>
+        <input
+          id="email"
+          name="email"
+          type="email"
+          autocomplete="email"
+          inputmode="email"
+          spellcheck="false"
+          required
+          maxlength={LIMITS.email.max}
+          aria-describedby="email-error"
+        />
+        <p class="field__error" id="email-error" data-error-for="email" hidden></p>
+      </div>
+
+      <div class="field">
+        <label for="organisation">
+          Company or organisation <span class="opt">Optional</span>
+        </label>
+        <input
+          id="organisation"
+          name="organisation"
+          type="text"
+          autocomplete="organization"
+          maxlength={LIMITS.organisation.max}
+          aria-describedby="organisation-error"
+        />
+        <p class="field__error" id="organisation-error" data-error-for="organisation" hidden></p>
+      </div>
+
+      <div class="field">
+        <label for="service">
+          Service of interest <span class="req">Required</span>
+        </label>
+        <select id="service" name="service" required aria-describedby="service-error">
+          <option value="">Select a service</option>
+          {groups.map(({ category, services }) => (
+            <optgroup label={category.title}>
+              {services.map((s) => (
+                <option value={s.id}>{s.data.title}</option>
+              ))}
+            </optgroup>
+          ))}
+          <option value="other">Not sure / other</option>
+        </select>
+        <p class="field__error" id="service-error" data-error-for="service" hidden></p>
+      </div>
+
+      <div class="field field--wide">
+        <label for="location">
+          Project location <span class="opt">Optional</span>
+        </label>
+        <input
+          id="location"
+          name="location"
+          type="text"
+          autocomplete="off"
+          placeholder="e.g. Chegutu District, Zimbabwe"
+          maxlength={LIMITS.location.max}
+          aria-describedby="location-error"
+        />
+        <p class="field__error" id="location-error" data-error-for="location" hidden></p>
+      </div>
+
+      <div class="field field--wide">
+        <label for="message">
+          Message <span class="req">Required</span>
+        </label>
+        <textarea
+          id="message"
+          name="message"
+          rows="7"
+          required
+          minlength={LIMITS.message.min}
+          maxlength={LIMITS.message.max}
+          aria-describedby="message-hint message-error"
+        ></textarea>
+        <p class="field__hint" id="message-hint">
+          Briefly describe the project, its stage and timeline. <span data-char-count></span>
+        </p>
+        <p class="field__error" id="message-error" data-error-for="message" hidden></p>
+      </div>
+    </div>
+
+    <div class="hp" aria-hidden="true">
+      <label for="website">Website (leave this field empty)</label>
+      <input id="website" name="website" type="text" tabindex="-1" autocomplete="off" />
+    </div>
+
+    <p class="form-privacy">
+      <Icon name="shield" size={18} />
+      <span>
+        We use these details only to respond to your enquiry. Read our <a href="/privacy/">privacy notice</a>.
+      </span>
+    </p>
+
+    <button type="submit" class="btn btn--primary contact-form__submit" data-submit>
+      <span data-submit-label>Send enquiry</span>
+      <Icon name="arrow-right" />
+    </button>
+  </form>
+
+  <div class="form-success" data-form-success tabindex="-1" hidden>
+    <Icon name="check-circle" size={40} strokeWidth={1.5} />
+    <h2>Thank you — your enquiry has been sent.</h2>
+    <p>
+      Our team has received your message<span data-success-ref></span>. We will reply to the email address you
+      provided.
+    </p>
+    <button type="button" class="btn btn--outline btn--sm" data-form-again>
+      Send another enquiry
+    </button>
+  </div>
+</div>
+
+<script>
+  import { initContactForm } from '../../scripts/contact-form';
+  initContactForm();
+</script>
+
+<style>
+  .contact-form {
+    display: grid;
+    gap: 22px;
+  }
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px 18px;
+  }
+  .field {
+    display: grid;
+    align-content: start;
+    gap: 7px;
+  }
+  .field--wide {
+    grid-column: 1 / -1;
+  }
+  .field label {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    font-weight: 750;
+  }
+  .req,
+  .opt {
+    color: var(--color-muted);
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+  .field :is(input, select, textarea) {
+    width: 100%;
+    min-height: 50px;
+    padding: 12px 14px;
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-sm);
+    background: #fff;
+    font-size: 1rem;
+    transition:
+      border-color var(--duration-fast) var(--ease-standard),
+      box-shadow var(--duration-fast) var(--ease-standard);
+  }
+  .field textarea {
+    min-height: 170px;
+    resize: vertical;
+    line-height: 1.6;
+  }
+  .field :is(input, select, textarea):hover {
+    border-color: #b9b3a6;
+  }
+  .field :is(input, select, textarea):focus-visible {
+    outline: 3px solid var(--focus-ring);
+    outline-offset: 1px;
+    border-color: var(--focus-ring);
+  }
+  .field :is(input, select, textarea)[aria-invalid='true'] {
+    border-color: #b42318;
+    box-shadow: inset 0 0 0 1px #b42318;
+  }
+  .field__hint {
+    color: var(--color-muted);
+    font-size: 0.875rem;
+  }
+  .field__error {
+    display: flex;
+    gap: 6px;
+    color: #b42318;
+    font-size: 0.875rem;
+    font-weight: 700;
+  }
+  .field__error::before {
+    content: '!';
+    display: inline-grid;
+    place-items: center;
+    flex: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #b42318;
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 900;
+  }
+  .hp {
+    display: none;
+  }
+  .form-privacy {
+    display: flex;
+    gap: 10px;
+    color: var(--color-muted);
+    font-size: 0.875rem;
+  }
+  .form-privacy :global(svg) {
+    flex: none;
+    color: var(--bc-green);
+  }
+  .form-privacy a {
+    color: var(--color-gold-readable);
+    font-weight: 700;
+  }
+  .contact-form__submit {
+    justify-self: start;
+    min-width: 200px;
+  }
+  .contact-form__submit[aria-busy='true'] :global(svg) {
+    animation: pulse 900ms ease-in-out infinite;
+  }
+  @keyframes pulse {
+    50% {
+      transform: translateX(4px);
+      opacity: 0.4;
+    }
+  }
+  .form-alert {
+    padding: 16px 18px;
+    border-radius: var(--radius-md);
+    border: 1px solid;
+    font-size: 0.9375rem;
+  }
+  .form-alert:focus {
+    outline: 3px solid var(--focus-ring);
+    outline-offset: 2px;
+  }
+  .form-alert[data-tone='error'] {
+    border-color: #f0b4ad;
+    background: #fef3f2;
+    color: #7a271a;
+  }
+  .form-alert[data-tone='warning'] {
+    border-color: #ecd39c;
+    background: #fffaf0;
+    color: #5c3f0b;
+  }
+  .form-alert :global(strong) {
+    display: block;
+    margin-bottom: 4px;
+  }
+  .form-alert :global(ul) {
+    margin: 8px 0 0;
+    padding-left: 18px;
+  }
+  .form-alert :global(a) {
+    color: inherit;
+    font-weight: 700;
+  }
+  .form-success {
+    display: grid;
+    justify-items: start;
+    gap: 12px;
+    padding: 32px;
+    border: 1px solid #b7d3a5;
+    border-radius: var(--radius-lg);
+    background: #f3f8ef;
+  }
+  .form-success:focus {
+    outline: 3px solid var(--focus-ring);
+    outline-offset: 2px;
+  }
+  .form-success :global(svg) {
+    color: var(--color-green-readable);
+  }
+  .form-success h2 {
+    font-size: 1.5rem;
+  }
+  @media (max-width: 599.98px) {
+    .form-grid {
+      grid-template-columns: 1fr;
+    }
+    .contact-form__submit {
+      width: 100%;
+    }
+  }
+</style>

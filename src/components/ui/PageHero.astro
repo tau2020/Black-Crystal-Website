@@ -1,0 +1,167 @@
+---
+import MediaImage from './MediaImage.astro';
+import Contours from './Contours.astro';
+
+interface Crumb {
+  name: string;
+  href: string;
+}
+interface Props {
+  title: string;
+  eyebrow?: string;
+  lead?: string;
+  image?: string;
+  /** Excludes the current page; Home is prepended automatically. */
+  crumbs?: Crumb[];
+  size?: 'default' | 'compact';
+  /** Short caption shown over the image, e.g. "Illustrative image". */
+  caption?: string;
+}
+const { title, eyebrow, lead, image, crumbs = [], size = 'default', caption } = Astro.props;
+const trail: Crumb[] = [{ name: 'Home', href: '/' }, ...crumbs];
+---
+
+<section class:list={['page-hero on-dark', `page-hero--${size}`, { 'page-hero--plain': !image }]}>
+  {image ? (
+    <div class="page-hero__media">
+      <MediaImage
+        name={image}
+        widths={[640, 960, 1280, 1600, 2000]}
+        sizes="100vw"
+        loading="eager"
+        fetchpriority="high"
+        alt=""
+      />
+    </div>
+  ) : (
+    <Contours class="page-hero__contours" rings={10} />
+  )}
+  <div class="page-hero__inner container container--wide">
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+      <ol role="list">
+        {trail.map((c) => (
+          <li>
+            <a href={c.href}>{c.name}</a>
+          </li>
+        ))}
+        <li>
+          <span aria-current="page">{title}</span>
+        </li>
+      </ol>
+    </nav>
+    {eyebrow && <p class="eyebrow">{eyebrow}</p>}
+    <h1>{title}</h1>
+    {lead && <p class="page-hero__lead">{lead}</p>}
+    <slot />
+  </div>
+  {caption && <p class="page-hero__caption">{caption}</p>}
+</section>
+
+<style>
+  .page-hero {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    min-height: clamp(340px, 46vh, 500px);
+    overflow: hidden;
+    background: var(--color-night);
+    isolation: isolate;
+  }
+  .page-hero--compact {
+    min-height: clamp(280px, 36vh, 380px);
+  }
+  .page-hero--plain {
+    background: linear-gradient(140deg, #2f4a36 0%, var(--color-panel) 40%, var(--color-panel-deep) 100%);
+  }
+  .page-hero__media {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+  }
+  .page-hero__media :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .page-hero__media::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(90deg, rgb(18 14 11 / 82%) 0%, rgb(18 14 11 / 55%) 45%, rgb(18 14 11 / 20%) 100%),
+      linear-gradient(0deg, rgb(18 14 11 / 55%) 0%, rgb(18 14 11 / 0%) 55%);
+  }
+  :global(.page-hero__contours) {
+    position: absolute;
+    right: -4%;
+    top: -30%;
+    width: min(60vw, 720px);
+    color: #c6962c;
+    opacity: 0.22;
+    z-index: -1;
+  }
+  .page-hero__inner {
+    padding-block: clamp(40px, 6vw, 72px) clamp(36px, 5vw, 60px);
+  }
+  .page-hero h1 {
+    max-width: 22ch;
+    font-size: clamp(2.2rem, 4.2vw, 3.9rem);
+  }
+  .page-hero__lead {
+    max-width: 62ch;
+    margin-top: 16px;
+    color: rgb(255 255 255 / 90%);
+    font-size: clamp(1.02rem, 1.25vw, 1.175rem);
+    line-height: 1.6;
+  }
+  .page-hero__caption {
+    position: absolute;
+    right: 16px;
+    bottom: 12px;
+    color: rgb(255 255 255 / 75%);
+    font-size: 0.75rem;
+  }
+  .breadcrumbs {
+    margin-bottom: 18px;
+  }
+  .breadcrumbs ol {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 0;
+    font-size: 0.8125rem;
+  }
+  .breadcrumbs li {
+    display: inline-flex;
+    align-items: center;
+    color: rgb(255 255 255 / 78%);
+  }
+  .breadcrumbs li + li::before {
+    content: '/';
+    margin-inline: 10px;
+    opacity: 0.6;
+  }
+  .breadcrumbs a {
+    color: #fff;
+    text-decoration: none;
+  }
+  .breadcrumbs a:hover {
+    text-decoration: underline;
+  }
+  .breadcrumbs [aria-current] {
+    max-width: 40ch;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  @media (max-width: 599.98px) {
+    .breadcrumbs li:not(:nth-last-child(2)):not(:last-child) {
+      display: none;
+    }
+    .breadcrumbs li:nth-last-child(2)::before {
+      content: none;
+    }
+    .breadcrumbs [aria-current] {
+      max-width: 22ch;
+    }
+  }
+</style>
