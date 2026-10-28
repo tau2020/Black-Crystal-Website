@@ -37,6 +37,8 @@ export default defineConfig({
     }),
   ],
   redirects: astroRedirects,
+  // Inline all CSS: removes render-blocking requests before first paint (measured with Lighthouse, see QA_REPORT.md).
+  build: { inlineStylesheets: 'always' },
   prefetch: { prefetchAll: false, defaultStrategy: 'hover' },
   image: { responsiveStyles: false },
   security: {

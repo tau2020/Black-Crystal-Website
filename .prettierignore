@@ -5,3 +5,6 @@ assets-source
 public/media
 src/content/projects/projects.json
 package-lock.json
+qa
+playwright-report
+test-results

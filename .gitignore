@@ -24,3 +24,5 @@ qa/lighthouse/*.html
 .vscode/
 .idea/
 *.log
+qa/lighthouse/*.report.json
+qa/lighthouse/*.report.html

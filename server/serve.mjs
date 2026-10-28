@@ -3,6 +3,7 @@
 // and applies the same security and cache headers that the generated host configs declare.
 //   npm run build:review && npm run start   →   http://127.0.0.1:4321
 import http from 'node:http';
+import compression from 'compression';
 import { legacyRedirects } from '../src/data/redirects.mjs';
 import { cacheRules, securityHeaders } from '../scripts/security-headers.mjs';
 
@@ -14,6 +15,9 @@ const port = Number(process.env.PORT ?? 4321);
 const hostOnly = legacyRedirects
   .filter((r) => r.hostOnly)
   .map((r) => ({ ...r, stem: decodeURIComponent(r.from).replace(/​\/?$/, '').replace(/\/$/, '') }));
+
+// gzip/brotli-negotiated compression for text responses (HTML, CSS, JS, JSON, SVG); media is left untouched.
+const compress = compression({ threshold: 1024 });
 
 const server = http.createServer((req, res) => {
   for (const [name, value] of Object.entries(securityHeaders)) res.setHeader(name, value);
@@ -28,7 +32,7 @@ const server = http.createServer((req, res) => {
     res.end();
     return;
   }
-  handler(req, res);
+  compress(req, res, () => handler(req, res));
 });
 
 server.listen(port, host, () => {
