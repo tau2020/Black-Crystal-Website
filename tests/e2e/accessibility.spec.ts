@@ -9,6 +9,8 @@ for (const url of [...keyPages, '/404/']) {
     await page.evaluate(() =>
       document.querySelectorAll('.reveal-pending').forEach((el) => el.classList.remove('reveal-pending')),
     );
+    // Let entrance transitions finish so contrast is measured on the final, fully opaque state.
+    await page.waitForTimeout(900);
     const results = await new AxeBuilder({ page })
       .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
       .analyze();

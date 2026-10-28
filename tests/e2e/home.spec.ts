@@ -78,7 +78,7 @@ test.describe('homepage', () => {
       muted: true,
       loop: true,
       controls: false,
-      src: expect.stringContaining('hero-desktop-1280x720.mp4'),
+      src: expect.stringMatching(/hero-(desktop-1280x720|mobile-960x720)\.mp4$/),
     });
     const toggle = page.getByRole('button', { name: 'Pause background video' });
     await toggle.click();

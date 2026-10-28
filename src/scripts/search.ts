@@ -107,8 +107,10 @@ export function initSearch(): void {
       })
       .then((data) => (index = data)));
 
+  let opener: HTMLElement | null = null;
   const open = () => {
     if (dialog.open) return;
+    opener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     dialog.showModal();
     document.documentElement.classList.add('is-scroll-locked');
     input.focus();
@@ -123,7 +125,10 @@ export function initSearch(): void {
 
   for (const button of openers) {
     button.hidden = false;
-    button.addEventListener('click', open);
+    button.addEventListener('click', () => {
+      button.focus();
+      open();
+    });
   }
   document.addEventListener('keydown', (event) => {
     const target = event.target as HTMLElement;
@@ -134,7 +139,12 @@ export function initSearch(): void {
     }
   });
 
-  dialog.addEventListener('close', () => document.documentElement.classList.remove('is-scroll-locked'));
+  dialog.addEventListener('close', () => {
+    document.documentElement.classList.remove('is-scroll-locked');
+    // Return focus to the control that opened search (Safari does not focus buttons on click).
+    const target = opener && opener !== document.body ? opener : openers.find((b) => b.offsetParent !== null);
+    target?.focus();
+  });
   dialog.querySelector('[data-search-close]')?.addEventListener('click', () => dialog.close());
   dialog.addEventListener('click', (event) => {
     if (event.target === dialog) dialog.close();

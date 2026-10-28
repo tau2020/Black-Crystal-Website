@@ -70,7 +70,6 @@ const ai = (src: ImageMetadata, alt: string, focus?: string): MediaItem => ({
 });
 
 export const media = {
-
   'banner-zebras': profile(bannerZebras, 'Zebras grazing in golden savanna grassland', 'center'),
   'banner-fieldwork': ai(
     bannerFieldwork,

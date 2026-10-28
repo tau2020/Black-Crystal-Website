@@ -12,6 +12,7 @@ export function initMobileNav(): void {
   const root = dialog.querySelector<HTMLElement>('[data-mnav-panel="root"]')!;
   const closeButton = dialog.querySelector<HTMLButtonElement>('[data-mobile-close]')!;
   let activePanel: HTMLElement | null = null;
+  let lastTrigger: HTMLElement | null = null;
   let activeTrigger: HTMLButtonElement | null = null;
 
   for (const trigger of triggers) {
@@ -33,6 +34,7 @@ export function initMobileNav(): void {
 
   function openDrawer(trigger: HTMLElement): void {
     resetPanels();
+    lastTrigger = trigger;
     dialog!.showModal();
     document.documentElement.classList.add('is-scroll-locked');
     trigger.setAttribute('aria-expanded', 'true');
@@ -42,6 +44,8 @@ export function initMobileNav(): void {
   dialog.addEventListener('close', () => {
     document.documentElement.classList.remove('is-scroll-locked');
     triggers.forEach((t) => t.setAttribute('aria-expanded', 'false'));
+    // Return focus explicitly: Safari does not focus links or buttons on tap.
+    if (lastTrigger?.isConnected && !window.matchMedia('(min-width: 1024px)').matches) lastTrigger.focus();
   });
   closeButton.addEventListener('click', () => dialog.close());
   dialog.addEventListener('click', (event) => {
