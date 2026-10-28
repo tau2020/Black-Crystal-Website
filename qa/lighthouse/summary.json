@@ -2,12 +2,25 @@
  "tool": "Lighthouse 13.6.0",
  "date": "2026-10-29",
  "server": "server/serve.mjs (review build, brotli)",
- "note": "Mobile = default Lighthouse mobile emulation with simulated slow 4G and 4x CPU slowdown.",
+ "note": "Mobile = Lighthouse default mobile emulation (simulated slow 4G, 4x CPU slowdown). Home measured 3 times per preset.",
  "runs": [
   {
    "preset": "desktop",
    "url": "/",
    "run": 1,
+   "performance": 100,
+   "accessibility": 100,
+   "bestPractices": 100,
+   "seo": 100,
+   "lcp": "0.5\u00a0s",
+   "fcp": "0.3\u00a0s",
+   "tbt": "0\u00a0ms",
+   "cls": "0"
+  },
+  {
+   "preset": "desktop",
+   "url": "/",
+   "run": 2,
    "performance": 100,
    "accessibility": 100,
    "bestPractices": 100,
@@ -20,26 +33,26 @@
   {
    "preset": "desktop",
    "url": "/",
-   "run": 2,
+   "run": 3,
    "performance": 100,
    "accessibility": 100,
    "bestPractices": 100,
    "seo": 100,
    "lcp": "0.5\u00a0s",
-   "fcp": "0.3\u00a0s",
+   "fcp": "0.2\u00a0s",
    "tbt": "0\u00a0ms",
-   "cls": "0"
+   "cls": "0.002"
   },
   {
    "preset": "desktop",
    "url": "/about/",
-   "run": 2,
+   "run": 1,
    "performance": 100,
    "accessibility": 100,
    "bestPractices": 100,
    "seo": 100,
    "lcp": "0.5\u00a0s",
-   "fcp": "0.3\u00a0s",
+   "fcp": "0.2\u00a0s",
    "tbt": "0\u00a0ms",
    "cls": "0.002"
   },
@@ -51,10 +64,23 @@
    "accessibility": 100,
    "bestPractices": 100,
    "seo": 100,
-   "lcp": "0.3\u00a0s",
-   "fcp": "0.3\u00a0s",
+   "lcp": "0.2\u00a0s",
+   "fcp": "0.2\u00a0s",
    "tbt": "0\u00a0ms",
    "cls": "0.002"
+  },
+  {
+   "preset": "desktop",
+   "url": "/insights/",
+   "run": 1,
+   "performance": 100,
+   "accessibility": 100,
+   "bestPractices": 100,
+   "seo": 100,
+   "lcp": "0.5\u00a0s",
+   "fcp": "0.3\u00a0s",
+   "tbt": "0\u00a0ms",
+   "cls": "0"
   },
   {
    "preset": "desktop",
@@ -65,7 +91,72 @@
    "bestPractices": 100,
    "seo": 100,
    "lcp": "0.5\u00a0s",
-   "fcp": "0.3\u00a0s",
+   "fcp": "0.2\u00a0s",
+   "tbt": "0\u00a0ms",
+   "cls": "0.002"
+  },
+  {
+   "preset": "desktop",
+   "url": "/projects/karo-platinum-mining-esia-ifc/",
+   "run": 1,
+   "performance": 100,
+   "accessibility": 100,
+   "bestPractices": 100,
+   "seo": 100,
+   "lcp": "0.5\u00a0s",
+   "fcp": "0.2\u00a0s",
+   "tbt": "0\u00a0ms",
+   "cls": "0.002"
+  },
+  {
+   "preset": "desktop",
+   "url": "/sectors/",
+   "run": 1,
+   "performance": 100,
+   "accessibility": 100,
+   "bestPractices": 100,
+   "seo": 100,
+   "lcp": "0.4\u00a0s",
+   "fcp": "0.2\u00a0s",
+   "tbt": "0\u00a0ms",
+   "cls": "0.002"
+  },
+  {
+   "preset": "desktop",
+   "url": "/sectors/mining/",
+   "run": 1,
+   "performance": 100,
+   "accessibility": 100,
+   "bestPractices": 100,
+   "seo": 100,
+   "lcp": "0.5\u00a0s",
+   "fcp": "0.2\u00a0s",
+   "tbt": "0\u00a0ms",
+   "cls": "0.002"
+  },
+  {
+   "preset": "desktop",
+   "url": "/services/",
+   "run": 1,
+   "performance": 100,
+   "accessibility": 100,
+   "bestPractices": 100,
+   "seo": 100,
+   "lcp": "0.7\u00a0s",
+   "fcp": "0.2\u00a0s",
+   "tbt": "0\u00a0ms",
+   "cls": "0.002"
+  },
+  {
+   "preset": "desktop",
+   "url": "/services/environmental-social-impact-assessment/",
+   "run": 1,
+   "performance": 100,
+   "accessibility": 100,
+   "bestPractices": 100,
+   "seo": 100,
+   "lcp": "0.4\u00a0s",
+   "fcp": "0.2\u00a0s",
    "tbt": "0\u00a0ms",
    "cls": "0.002"
   },
@@ -79,8 +170,8 @@
    "seo": 100,
    "lcp": "2.4\u00a0s",
    "fcp": "0.8\u00a0s",
-   "tbt": "0\u00a0ms",
-   "cls": "0"
+   "tbt": "40\u00a0ms",
+   "cls": "0.001"
   },
   {
    "preset": "mobile",
@@ -106,7 +197,7 @@
    "lcp": "2.4\u00a0s",
    "fcp": "0.8\u00a0s",
    "tbt": "0\u00a0ms",
-   "cls": "0"
+   "cls": "0.001"
   },
   {
    "preset": "mobile",
@@ -116,7 +207,7 @@
    "accessibility": 100,
    "bestPractices": 100,
    "seo": 100,
-   "lcp": "1.7\u00a0s",
+   "lcp": "1.6\u00a0s",
    "fcp": "0.8\u00a0s",
    "tbt": "0\u00a0ms",
    "cls": "0.001"
@@ -125,19 +216,6 @@
    "preset": "mobile",
    "url": "/contact/",
    "run": 1,
-   "performance": 91,
-   "accessibility": 100,
-   "bestPractices": 100,
-   "seo": 100,
-   "lcp": "1.1\u00a0s",
-   "fcp": "1.1\u00a0s",
-   "tbt": "380\u00a0ms",
-   "cls": "0.001"
-  },
-  {
-   "preset": "mobile",
-   "url": "/contact/",
-   "run": 2,
    "performance": 100,
    "accessibility": 100,
    "bestPractices": 100,
@@ -145,32 +223,6 @@
    "lcp": "0.8\u00a0s",
    "fcp": "0.8\u00a0s",
    "tbt": "0\u00a0ms",
-   "cls": "0"
-  },
-  {
-   "preset": "mobile",
-   "url": "/contact/",
-   "run": 3,
-   "performance": 100,
-   "accessibility": 100,
-   "bestPractices": 100,
-   "seo": 100,
-   "lcp": "0.8\u00a0s",
-   "fcp": "0.8\u00a0s",
-   "tbt": "0\u00a0ms",
-   "cls": "0"
-  },
-  {
-   "preset": "mobile",
-   "url": "/contact/",
-   "run": 4,
-   "performance": 95,
-   "accessibility": 100,
-   "bestPractices": 100,
-   "seo": 100,
-   "lcp": "1.1\u00a0s",
-   "fcp": "1.1\u00a0s",
-   "tbt": "270\u00a0ms",
    "cls": "0.001"
   },
   {
@@ -181,20 +233,7 @@
    "accessibility": 100,
    "bestPractices": 100,
    "seo": 100,
-   "lcp": "2.2\u00a0s",
-   "fcp": "0.9\u00a0s",
-   "tbt": "60\u00a0ms",
-   "cls": "0.045"
-  },
-  {
-   "preset": "mobile",
-   "url": "/insights/what-an-esia-involves/",
-   "run": 1,
-   "performance": 100,
-   "accessibility": 100,
-   "bestPractices": 100,
-   "seo": 69,
-   "lcp": "1.4\u00a0s",
+   "lcp": "2.0\u00a0s",
    "fcp": "0.8\u00a0s",
    "tbt": "0\u00a0ms",
    "cls": "0.001"
@@ -207,7 +246,7 @@
    "accessibility": 100,
    "bestPractices": 100,
    "seo": 100,
-   "lcp": "1.7\u00a0s",
+   "lcp": "1.8\u00a0s",
    "fcp": "0.8\u00a0s",
    "tbt": "0\u00a0ms",
    "cls": "0.001"
@@ -223,7 +262,20 @@
    "lcp": "1.7\u00a0s",
    "fcp": "0.8\u00a0s",
    "tbt": "0\u00a0ms",
-   "cls": "0"
+   "cls": "0.001"
+  },
+  {
+   "preset": "mobile",
+   "url": "/sectors/",
+   "run": 1,
+   "performance": 100,
+   "accessibility": 100,
+   "bestPractices": 100,
+   "seo": 100,
+   "lcp": "1.8\u00a0s",
+   "fcp": "0.8\u00a0s",
+   "tbt": "0\u00a0ms",
+   "cls": "0.001"
   },
   {
    "preset": "mobile",
@@ -242,13 +294,26 @@
    "preset": "mobile",
    "url": "/services/",
    "run": 1,
-   "performance": 97,
+   "performance": 98,
    "accessibility": 100,
    "bestPractices": 100,
    "seo": 100,
-   "lcp": "2.4\u00a0s",
-   "fcp": "1.0\u00a0s",
-   "tbt": "80\u00a0ms",
+   "lcp": "2.3\u00a0s",
+   "fcp": "0.8\u00a0s",
+   "tbt": "0\u00a0ms",
+   "cls": "0"
+  },
+  {
+   "preset": "mobile",
+   "url": "/services/environmental-social-impact-assessment/",
+   "run": 1,
+   "performance": 100,
+   "accessibility": 100,
+   "bestPractices": 100,
+   "seo": 100,
+   "lcp": "0.8\u00a0s",
+   "fcp": "0.8\u00a0s",
+   "tbt": "0\u00a0ms",
    "cls": "0.001"
   }
  ]

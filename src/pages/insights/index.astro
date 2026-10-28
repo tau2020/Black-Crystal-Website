@@ -148,6 +148,13 @@ const site = Astro.site ?? new URL('https://blackcrystal.co.zw');
     flex: none;
     color: #8a6416;
   }
+  /* Hidden in the HTML so there are no dead buttons without JavaScript; where scripting is available it is
+     shown from the first paint, so enabling it does not shift the article grid (CLS). */
+  @media (scripting: enabled) {
+    .topic-filter[hidden] {
+      display: flex !important;
+    }
+  }
   .topic-filter {
     display: flex;
     flex-wrap: wrap;
