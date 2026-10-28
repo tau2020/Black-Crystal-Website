@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test';
 test('project filters update results, count and URL', async ({ page }) => {
   await page.goto('/projects/');
   const count = page.locator('[data-filter-count]');
-  await expect(count).toHaveText('Showing all 94 projects');
+  await expect(count).toHaveText('Showing 24 of 94 projects');
   await page.getByLabel('Sector', { exact: true }).selectOption('tourism');
   await expect(count).toContainText('of 94 projects');
   await expect(page).toHaveURL(/sector=tourism/);
@@ -17,7 +17,20 @@ test('project filters update results, count and URL', async ({ page }) => {
   await page.getByRole('button', { name: /Remove filter Sector/ }).click();
   await expect(page).not.toHaveURL(/sector=/);
   await page.getByRole('button', { name: 'Clear filters' }).click();
+  await expect(count).toHaveText('Showing 24 of 94 projects');
+});
+
+test('the unfiltered list is revealed in pages and focus moves to new results', async ({ page }) => {
+  await page.goto('/projects/');
+  const count = page.locator('[data-filter-count]');
+  await expect(page.locator('[data-project]:visible')).toHaveCount(24);
+  await page.getByRole('button', { name: 'Show 24 more projects' }).click();
+  await expect(count).toHaveText('Showing 48 of 94 projects');
+  await expect(page.locator('[data-project]:visible').nth(24).locator('a')).toBeFocused();
+  await page.getByRole('button', { name: 'Show 24 more projects' }).click();
+  await page.getByRole('button', { name: 'Show 22 more projects' }).click();
   await expect(count).toHaveText('Showing all 94 projects');
+  await expect(page.locator('[data-show-more]')).toBeHidden();
 });
 
 test('deep links pre-apply filters', async ({ page }) => {

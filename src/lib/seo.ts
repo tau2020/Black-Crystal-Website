@@ -11,7 +11,7 @@ export function organizationJsonLd(site: URL): Record<string, unknown> {
     slogan: company.tagline,
     url: site.href,
     logo: new URL('/brand/favicon-512.png', site).href,
-    image: new URL('/brand/social-share-og.jpg', site).href,
+    image: new URL('/brand/og-default.jpg', site).href,
     foundingDate: String(company.founded),
     foundingLocation: { '@type': 'Place', name: company.foundedCity },
     email: contact.email,

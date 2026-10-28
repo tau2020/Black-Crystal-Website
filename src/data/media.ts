@@ -1,13 +1,9 @@
 import type { ImageMetadata } from 'astro';
 
-// Hero (frames of the approved sleeping-elephant video; see VIDEO_ASSET_LOG.md)
-import heroPosterDesktop from '../assets/images/hero/poster-desktop.png';
-import heroPosterMobile from '../assets/images/hero/poster-mobile.png';
 // Banners
 import bannerZebras from '../assets/images/banners/about-zebras.webp';
 import bannerFieldwork from '../assets/images/banners/fieldwork-expert-portrait.webp';
 import bannerFooterValley from '../assets/images/banners/footer-valley.webp';
-import bannerFooterTree from '../assets/images/banners/footer-tree-sunset.webp';
 import bannerLandscape from '../assets/images/banners/sector-overview-landscape.webp';
 // Sector cards
 import sectorMining from '../assets/images/sectors/mining.webp';
@@ -21,7 +17,6 @@ import serviceCommunity from '../assets/images/services/community-social-impact.
 import serviceTraining from '../assets/images/services/training-education.webp';
 import serviceSpecialised from '../assets/images/services/specialized-technical.webp';
 // Project thumbnails
-import projectHeritage from '../assets/images/projects/cultural-heritage.webp';
 import projectWater from '../assets/images/projects/infrastructure-water.webp';
 import projectMining from '../assets/images/projects/mining-assessment.webp';
 import projectSolar from '../assets/images/projects/renewable-solar.webp';
@@ -47,7 +42,7 @@ import profileTreePlanting from '../assets/images/profile/tree-planting.jpg';
 import profileZebras from '../assets/images/profile/zebras-panorama.jpg';
 import profileCleanUp from '../assets/images/profile/community-clean-up.jpg';
 
-export type MediaOrigin = 'hero-video' | 'company-profile-2024' | 'ai-illustrative';
+export type MediaOrigin = 'company-profile-2024' | 'ai-illustrative';
 
 export interface MediaItem {
   src: ImageMetadata;
@@ -75,13 +70,6 @@ const ai = (src: ImageMetadata, alt: string, focus?: string): MediaItem => ({
 });
 
 export const media = {
-  'hero-poster-desktop': {
-    src: heroPosterDesktop,
-    alt: '',
-    origin: 'hero-video',
-    illustrative: true,
-  },
-  'hero-poster-mobile': { src: heroPosterMobile, alt: '', origin: 'hero-video', illustrative: true },
 
   'banner-zebras': profile(bannerZebras, 'Zebras grazing in golden savanna grassland', 'center'),
   'banner-fieldwork': ai(
@@ -90,7 +78,6 @@ export const media = {
     'center top',
   ),
   'banner-footer-valley': ai(bannerFooterValley, 'River valley at dusk in southern Africa'),
-  'banner-footer-tree': ai(bannerFooterTree, 'Silhouette of an acacia tree at sunset'),
   'banner-landscape': ai(
     bannerLandscape,
     'Hills and a river winding through a wooded southern African valley',
@@ -113,7 +100,6 @@ export const media = {
   ),
   'service-specialised': profile(serviceSpecialised, 'Aerial view of an earthen quarry landscape'),
 
-  'project-heritage': ai(projectHeritage, 'Illustrative image of rock art on a sandstone surface'),
   'project-water': ai(projectWater, 'Illustrative image of a bridge crossing a river in hilly country'),
   'project-mining': profile(projectMining, 'Aerial view of open-pit mine workings'),
   'project-solar': profile(projectSolar, 'Rows of solar panels in a ground-mounted solar installation'),

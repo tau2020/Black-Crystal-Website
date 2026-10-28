@@ -1,5 +1,8 @@
 // Client-side filtering of the documented project list, synchronised with the URL query string
-// (?sector=&category=&period=&service=&q=). Without JavaScript every project remains listed.
+// (?sector=&category=&period=&service=&q=). Unfiltered, the list is revealed in pages of PAGE_SIZE so the
+// mobile page stays a manageable length. Without JavaScript every project remains listed.
+
+const PAGE_SIZE = 24;
 
 type FilterKey = 'sector' | 'category' | 'period' | 'service' | 'q';
 const KEYS: FilterKey[] = ['q', 'sector', 'category', 'period', 'service'];
@@ -17,7 +20,9 @@ export function initProjectFilters(): void {
   const count = document.querySelector<HTMLElement>('[data-filter-count]');
   const empty = document.querySelector<HTMLElement>('[data-filter-empty]');
   const chips = form?.querySelector<HTMLElement>('[data-filter-chips]');
-  if (!form || !list || !count || !empty || !chips) return;
+  const more = document.querySelector<HTMLElement>('[data-show-more]');
+  const moreButton = more?.querySelector<HTMLButtonElement>('button');
+  if (!form || !list || !count || !empty || !chips || !more || !moreButton) return;
 
   const countEl: HTMLElement = count;
   const emptyEl: HTMLElement = empty;
@@ -27,6 +32,8 @@ export function initProjectFilters(): void {
     form.elements.namedItem(key) as HTMLInputElement | HTMLSelectElement | null;
   let searchTimer = 0;
   let chipSignature = '';
+  let limit = PAGE_SIZE;
+  let lastSignature: string | null = null;
 
   const read = (): Record<FilterKey, string> =>
     Object.fromEntries(KEYS.map((k) => [k, (field(k)?.value ?? '').trim()])) as Record<FilterKey, string>;
@@ -43,27 +50,37 @@ export function initProjectFilters(): void {
   function apply(updateUrl = true): void {
     const f = read();
     const terms = f.q.toLowerCase().split(/\s+/).filter(Boolean);
-    let shown = 0;
-    for (const card of cards) {
+    const active = KEYS.filter((k) => f[k]);
+    const signature = active.map((k) => `${k}=${f[k]}`).join('&');
+    if (signature !== lastSignature) limit = PAGE_SIZE; // a new filter set starts from the first page
+    lastSignature = signature;
+
+    const matches = cards.filter((card) => {
       const d = card.dataset;
-      const visible =
+      return (
         (!f.sector || (d.sectors ?? '').split(' ').includes(f.sector)) &&
         (!f.category || (d.categories ?? '').split(' ').includes(f.category)) &&
         (!f.period || d.period === f.period) &&
         (!f.service || (d.services ?? '').split(' ').includes(f.service)) &&
-        terms.every((t) => (d.search ?? '').includes(t));
-      card.hidden = !visible;
-      if (visible) shown++;
-    }
-    const active = KEYS.filter((k) => f[k]);
-    countEl.textContent = active.length
-      ? `Showing ${shown} of ${cards.length} projects`
-      : `Showing all ${cards.length} projects`;
-    emptyEl.hidden = shown > 0;
+        terms.every((t) => (d.search ?? '').includes(t))
+      );
+    });
+    // Filtered results are short enough to show in full; the unfiltered list is paged.
+    const visibleCount = active.length ? matches.length : Math.min(limit, matches.length);
+    const visible = new Set(matches.slice(0, visibleCount));
+    for (const card of cards) card.hidden = !visible.has(card);
+
+    countEl.textContent =
+      visibleCount === cards.length
+        ? `Showing all ${cards.length} projects`
+        : `Showing ${visibleCount} of ${cards.length} projects`;
+    emptyEl.hidden = matches.length > 0;
+    const remaining = matches.length - visibleCount;
+    more!.hidden = remaining <= 0;
+    moreButton!.textContent = `Show ${Math.min(PAGE_SIZE, remaining)} more projects`;
 
     // Only rebuild the chips when they change: replacing them mid-click (e.g. when the keyword box blurs)
     // would swallow the click on the chip under the pointer.
-    const signature = active.map((k) => `${k}=${f[k]}`).join('&');
     if (signature !== chipSignature) {
       chipSignature = signature;
       chips!.replaceChildren(
@@ -129,7 +146,13 @@ export function initProjectFilters(): void {
     const control = field(button.dataset.clear as FilterKey);
     if (control) control.value = '';
     apply();
-    count.focus?.();
+  });
+  moreButton.addEventListener('click', () => {
+    const firstNew = cards.filter((c) => c.hidden)[0];
+    limit += PAGE_SIZE;
+    apply(false);
+    // Move keyboard focus to the first newly revealed project.
+    firstNew?.querySelector<HTMLAnchorElement>('a')?.focus();
   });
 
   apply(false);

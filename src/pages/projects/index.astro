@@ -210,7 +210,7 @@ const barClass = (n: number, max: number) => `w-${Math.round(pct(n, max) / 5) * 
         <div class="filters__chips" data-filter-chips aria-label="Active filters"></div>
       </form>
 
-      <ul class="project-grid" role="list" data-project-list>
+      <ul class="project-grid" id="project-list" role="list" data-project-list>
         {projects.map((project) => (
           <ProjectCard
             project={project}
@@ -222,6 +222,11 @@ const barClass = (n: number, max: number) => `w-${Math.round(pct(n, max) / 5) * 
           />
         ))}
       </ul>
+      <div class="portfolio__more" data-show-more hidden>
+        <button type="button" class="btn btn--outline" aria-controls="project-list">
+          Show more projects
+        </button>
+      </div>
       <div class="portfolio__empty" data-filter-empty hidden>
         <p>
           <strong>No projects match these filters.</strong>
@@ -596,6 +601,11 @@ const barClass = (n: number, max: number) => `w-${Math.round(pct(n, max) / 5) * 
   }
   .project-grid :global([data-project][hidden]) {
     display: none;
+  }
+  .portfolio__more {
+    display: flex;
+    justify-content: center;
+    margin-top: 28px;
   }
   .portfolio__empty {
     padding: 32px;
