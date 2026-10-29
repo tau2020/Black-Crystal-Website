@@ -1,6 +1,6 @@
 # Launch checklist
 
-The site is **ready for owner review on localhost**. It must not be pushed or deployed until every item in sections 1–3 is resolved and the owner explicitly approves.
+The owner reviewed the localhost build. On 29 October 2026 they approved publishing the code to GitHub and a Vercel preview. The **production launch** waits until every item in sections 1–3 is resolved and the owner explicitly approves it.
 
 ## 1. Owner approvals (content and facts)
 
@@ -27,7 +27,7 @@ The site is **ready for owner review on localhost**. It must not be pushed or de
 
 ## 3. Configuration
 
-- [ ] **Hosting decision** (`ARCHITECTURE.md → Hosting options`): a Node host, Apache static hosting plus an endpoint, or Netlify/Cloudflare with the platform adapter.
+- [ ] **Hosting decision** (`ARCHITECTURE.md → Hosting options`): a Node host, Apache static hosting plus an endpoint, Netlify/Cloudflare with the platform adapter, or Vercel. Vercel is set up for previews; production there needs a paid plan.
 - [ ] **Email delivery:**
   - [ ] Create or confirm a mailbox and SMTP account.
   - [ ] Set `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`, `CONTACT_TO` and `CONTACT_FROM` on the server (never in Git).
@@ -45,20 +45,19 @@ npm run check && npm run lint && npm run test
 npm run build            # production build: drafts excluded
 npm run links
 npm run build:review && PW_ENGINES=all npm run test:e2e   # optional full browser run
+npm run build:vercel && node scripts/check-vercel-routes.mjs   # when deploying to Vercel
 ```
 
 - [ ] Review the production build (`npm run build && npm run start`) in a browser, on a phone and a desktop.
 - [ ] Watch the hero video for 30 seconds on a real phone and a real laptop (loop, smoothness, pause button).
 - [ ] Spot-check five legacy URLs on the live host for 301s (for example `/about-us/`, `/mining-sector/`, `/our-services/`).
 
-## 5. The one approved push
+## 5. Publishing and deployments
 
-There is no CI/CD. A local `pre-push` hook (not committed) blocks pushes until the owner approves.
-
-1. The owner explicitly approves the push in writing.
-2. Remove the guard: `rm .git/hooks/pre-push`.
-3. Push once: `git push -u origin main`.
-4. Do not add `.github/workflows/` or other automation without a separate decision.
+- [x] The owner approved publishing to GitHub on 29 October 2026, and the local `pre-push` guard was removed.
+- Changes reach `main` through pull requests, and are pushed only with the owner's approval.
+- Vercel deployments are manual (`vercel build`, then `vercel deploy --prebuilt`; see `README.md`). Git deployments stay disabled in `vercel.json`.
+- Do not add `.github/workflows/` or other automation without a separate decision.
 
 ## 6. After launch
 

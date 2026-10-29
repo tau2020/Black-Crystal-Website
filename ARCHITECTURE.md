@@ -37,12 +37,15 @@
 ## Folder structure
 
 ```
-astro.config.mjs        site, adapter, CSP, allowed hosts, fonts, redirects, sitemap
+astro.config.mjs        site, adapter (Node, or Vercel when VERCEL=1), CSP, allowed hosts, fonts, redirects, sitemap
+vercel.json             Vercel build command; Git deployments disabled
 server/serve.mjs        production/review server (headers, compression, zero-width-space redirects)
 scripts/
   postbuild.mjs         writes .htaccess, _headers, _redirects into dist/client
+  postbuild-vercel.mjs  adds headers and legacy 301s to .vercel/output/config.json
   security-headers.mjs  single source for response headers and cache rules
   check-links.mjs       internal link / asset / fragment checker
+  check-vercel-routes.mjs  replays the Vercel routing config: redirects, page reachability, headers
   build-hero-video.sh   reproducible FFmpeg pipeline for the hero
   screenshot.mjs        responsive screenshot capture for QA
 src/
@@ -95,17 +98,22 @@ browser ──POST JSON or form──► /api/contact (src/pages/api/contact.ts)
 ## Security
 
 - **CSP:** Astro emits a per-page `<meta>` policy with SHA-256 hashes for every inline script and style (`security.csp` in `astro.config.mjs`). The header policy adds `frame-ancestors 'none'`, `base-uri`, `object-src` and `form-action`.
-- **Headers** (`scripts/security-headers.mjs`): HSTS, `X-Content-Type-Options`, `X-Frame-Options: DENY`, `Referrer-Policy`, `Permissions-Policy` and `Cross-Origin-Opener-Policy`. They are applied by the Node server and written into `.htaccess` and `_headers`.
+- **Headers** (`scripts/security-headers.mjs`): HSTS, `X-Content-Type-Options`, `X-Frame-Options: DENY`, `Referrer-Policy`, `Permissions-Policy` and `Cross-Origin-Opener-Policy`. They are applied by the Node server and written into `.htaccess`, `_headers` and Vercel's `config.json`.
 - **Trusted hosts:** `security.allowedDomains` lists the hosts Astro may trust from `Host` / `X-Forwarded-*`. Without it, Astro 7 builds every request URL as `http://localhost`, and same-origin form posts would fail its CSRF check.
 - **No third parties at runtime:** no analytics, tag managers, CDNs, remote fonts, maps embeds or Mahlatini resources. External links (Google Maps directions) are plain links.
 - **Secrets:** read from `process.env` on the server only. `.env` is gitignored.
 
 ## Hosting options (owner decision required)
 
-The legacy site runs on Apache with WordPress at `blackcrystal.co.zw`. The build supports three routes:
+The legacy site runs on Apache with WordPress at `blackcrystal.co.zw`. The build supports four routes:
 
 1. **Node host** (simplest, everything works): run `npm ci && npm run build && npm run start` behind HTTPS (a reverse proxy may set `TRUST_PROXY=true`). Set the SMTP variables.
 2. **Apache static hosting** (the current host type): upload `dist/client/`. The generated `.htaccess` provides HTTPS, the canonical host, 301s, headers and caching. The contact endpoint needs an additional runtime: a Node app if the host offers one, or a small server-side handler implementing the same contract (`ARCHITECTURE.md → Contact form`). Until then the form shows the honest "not connected" state.
 3. **Netlify / Cloudflare Pages:** swap `@astrojs/node` for the platform adapter. The handler uses standard `Request`/`Response`. `_headers` and `_redirects` are generated. The in-memory rate limiter should be replaced with the platform's KV or rate-limiting features.
+4. **Vercel** (used for previews): `vercel build` sets `VERCEL=1`, which selects `@astrojs/vercel`.
+   - Pages and media are served from Vercel's CDN, and `/api/contact` runs as a Node 24 function.
+   - `scripts/postbuild-vercel.mjs` adds the shared headers and all 79 legacy 301s to the routing config.
+   - Builds run locally and are uploaded with `vercel deploy --prebuilt` (see `README.md`).
+   - For production: the rate limiter is per function instance, so use Vercel's firewall rate limiting or a shared store. Vercel's free Hobby plan is for non-commercial use, so a company site needs a paid plan.
 
 In every case, deployment is a manual, owner-approved step. There are no CI/CD pipelines.

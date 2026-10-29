@@ -2,10 +2,14 @@
 import { defineConfig, fontProviders } from 'astro/config';
 import node from '@astrojs/node';
 import sitemap from '@astrojs/sitemap';
+import vercel from '@astrojs/vercel';
 import { astroRedirects } from './src/data/redirects.mjs';
 
 // Canonical production origin. Override with SITE_URL when building for a different host.
 const site = process.env.SITE_URL ?? 'https://blackcrystal.co.zw';
+
+// `vercel build` and Vercel's build machines set VERCEL=1: emit Vercel's Build Output API instead of the Node server.
+const onVercel = process.env.VERCEL === '1';
 
 // Hosts Astro may trust from the Host / X-Forwarded-* headers. Without this list Astro 7 builds every request
 // URL as http://localhost, which makes same-origin form posts fail its CSRF origin check.
@@ -30,7 +34,7 @@ export default defineConfig({
   devToolbar: { enabled: false },
   // Astro 7 defaults to JSX whitespace rules, which can silently join words across lines.
   compressHTML: true,
-  adapter: node({ mode: 'standalone' }),
+  adapter: onVercel ? vercel() : node({ mode: 'standalone' }),
   integrations: [
     sitemap({
       filter: (page) => !NON_INDEXABLE.test(page),

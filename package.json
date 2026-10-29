@@ -11,6 +11,7 @@
     "dev": "astro dev",
     "build": "astro build && node scripts/postbuild.mjs",
     "build:review": "BC_SHOW_DRAFTS=true astro build && node scripts/postbuild.mjs",
+    "build:vercel": "VERCEL=1 astro build && node scripts/postbuild-vercel.mjs",
     "start": "node --env-file-if-exists=.env server/serve.mjs",
     "check": "astro check",
     "lint": "eslint .",
@@ -25,6 +26,7 @@
   "dependencies": {
     "@astrojs/node": "^11.1.9",
     "@astrojs/sitemap": "^3.7.4",
+    "@astrojs/vercel": "^11.0.17",
     "astro": "^7.4.4",
     "compression": "^1.8.2",
     "nodemailer": "^10.2.1",
@@ -43,5 +45,13 @@
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.72.1",
     "vitest": "^5.0.5"
+  },
+  "overrides": {
+    "@vercel/routing-utils": {
+      "path-to-regexp": "6.3.0"
+    },
+    "@vercel/cli-config": {
+      "zod": "^4.6.7"
+    }
   }
 }

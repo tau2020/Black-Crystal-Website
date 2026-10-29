@@ -57,6 +57,7 @@ Implementation:
 
 - **Node server:** Astro `redirects` (true 301s) plus `server/serve.mjs` for two WordPress slugs that end in a zero-width space (`%E2%80%8B`).
 - **Apache:** generated `dist/client/.htaccess`, which also forces HTTPS and the canonical host. **Netlify/Cloudflare:** generated `_redirects`.
+- **Vercel:** `scripts/postbuild-vercel.mjs` writes all 79 redirects into `.vercel/output/config.json`, with and without the trailing slash. The adapter's own redirect routes match only paths without the slash, which none of the WordPress URLs are.
 - **Tested:** `tests/e2e/seo.spec.ts`, including a zero-width-space slug.
 
 **Before launch:** re-crawl the live site for any URLs added since the audit. Keep the old domain and its HTTPS certificate on the same host so that the redirects resolve. Submit the new sitemap in Google Search Console.

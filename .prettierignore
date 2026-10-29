@@ -1,5 +1,6 @@
 dist
 .astro
+.vercel
 node_modules
 assets-source
 public/media

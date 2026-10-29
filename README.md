@@ -2,7 +2,7 @@
 
 The website of Black Crystal Consulting, an environmental, social and cultural heritage advisory firm established in Harare in 2005. It is built with [Astro](https://astro.build) as a static-first site. A small Node endpoint handles the enquiry form.
 
-> **Status:** local build ready for owner review. Nothing has been pushed or deployed. No CI/CD is configured, by design.
+> **Status:** reviewed on localhost. On 29 October 2026 the owner approved publishing the code to GitHub and a Vercel preview. Production launch still waits for the items in `LAUNCH_CHECKLIST.md`. No CI/CD is configured, by design.
 
 ## Quick start
 
@@ -24,6 +24,7 @@ npm run start          # production server (static pages + /api/contact) → htt
 | ------------------------------------------ | ----------------------------------------------------------------------------------------- |
 | `npm run dev`                              | Astro dev server (drafts visible, no CSP)                                                 |
 | `npm run build` / `build:review`           | Production build without / with draft insights                                            |
+| `npm run build:vercel`                     | Production build for Vercel (`.vercel/output`); run by `vercel build`                     |
 | `npm run start`                            | `server/serve.mjs`: Astro handler, security headers, compression, legacy redirects        |
 | `npm run check`                            | TypeScript and Astro diagnostics                                                          |
 | `npm run lint` / `format` / `format:check` | ESLint and Prettier                                                                       |
@@ -33,6 +34,7 @@ npm run start          # production server (static pages + /api/contact) → htt
 | `npm run qa`                               | Everything above, in order                                                                |
 | `npm run video:build`                      | Regenerates the hero video derivatives and posters from the original (FFmpeg)             |
 | `node scripts/screenshot.mjs /path …`      | Full-page screenshots at 360–1920px into `qa/screenshots/`                                |
+| `node scripts/check-vercel-routes.mjs`     | After `build:vercel`: verifies redirects, page reachability and headers in Vercel routing |
 
 ## Configuration
 
@@ -43,6 +45,19 @@ Copy `.env.example` to `.env` (never commit `.env`). The variables that matter:
   - **Until these are set, the form honestly reports that online enquiries are not connected** (HTTP 503) and shows the email address and phone number instead. It never claims a message was sent.
   - For local testing only, `CONTACT_TRANSPORT=capture` with `CONTACT_ALLOW_CAPTURE=true` writes each enquiry to `.data/outbox/*.eml`.
 - `CONTACT_RATE_LIMIT`, `CONTACT_RATE_WINDOW_MINUTES`, `TRUST_PROXY`, `ALLOWED_HOSTS`: see the comments in `.env.example`.
+
+## Vercel preview
+
+Previews are built on this machine and uploaded already built. Vercel never builds from Git: `vercel.json` sets `git.deploymentEnabled: false`.
+
+```bash
+vercel pull --yes --environment=preview   # once per machine: links the project and fetches its settings
+vercel build                              # runs npm run build:vercel (VERCEL=1 selects @astrojs/vercel)
+vercel deploy --prebuilt                  # uploads .vercel/output as a preview deployment
+```
+
+- The preview is the production build: draft insights are excluded. To include them, run `BC_SHOW_DRAFTS=true vercel build`.
+- The contact form needs the SMTP variables set as Vercel environment variables. Until then it returns the same honest "not connected" response.
 
 ## Editing content
 
@@ -76,6 +91,6 @@ The build validates content against schemas (`src/content.config.ts`). Typos in 
 
 ## Repository policy
 
-- **No CI/CD:** there is no `.github/workflows/`, and builds and tests run locally.
-- **No pushes before owner approval.** A local `pre-push` hook (`.git/hooks/pre-push`, not committed) blocks `git push` until it is deliberately removed after approval. See `LAUNCH_CHECKLIST.md`.
+- **No CI/CD:** there is no `.github/workflows/`, builds and tests run locally, and Vercel's Git deployments are disabled.
+- **Changes reach `main` through pull requests**, and are pushed and deployed only with the owner's approval. See `LAUNCH_CHECKLIST.md`.
 - `assets-source/video/hero-video-original.mp4` keeps the supplied hero video untouched (including its audio track) so that the derivatives can be regenerated.

@@ -6,6 +6,7 @@ export default [
     ignores: [
       'dist/',
       '.astro/',
+      '.vercel/',
       'node_modules/',
       'assets-source/',
       'test-results/',
