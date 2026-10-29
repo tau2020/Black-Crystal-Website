@@ -1,0 +1,549 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/ui/PageHero.astro';
+import CtaBand from '../components/ui/CtaBand.astro';
+import Icon from '../components/ui/Icon.astro';
+import MediaImage from '../components/ui/MediaImage.astro';
+import { about, company, contact } from '../data/site';
+import { breadcrumbJsonLd } from '../lib/seo';
+
+const site = Astro.site ?? new URL('https://blackcrystal.co.zw');
+
+const facts = [
+  { label: 'Established', value: `${company.founded}, ${company.foundedCity}` },
+  {
+    label: 'Company registration (Zimbabwe)',
+    value: `Private Limited Company No. ${company.registrationNumber}`,
+  },
+  {
+    label: 'South Africa',
+    value: `Registered as a Private Limited Company in ${company.southAfricaRegistered}`,
+  },
+  {
+    label: 'Combined professional experience',
+    value: `${company.combinedExperience}, across our specialist team`,
+  },
+  {
+    label: 'Specialist sectors',
+    value: 'Construction, conventional and renewable energy, housing, minerals and mining, and tourism',
+  },
+];
+
+// Milestones documented in the Company Profile 2024 (page references in CONTENT_SOURCES.md).
+const milestones = [
+  { year: '2005', text: 'Black Crystal Consulting is established in Harare, Zimbabwe.' },
+  {
+    year: '2008',
+    text: 'Environmental awareness training for contract environmental officers on the Unki Platinum project site.',
+  },
+  {
+    year: '2010',
+    text: 'Appointed technical advisors to a REDD+ forest carbon project covering four Communal Lands in northern Zimbabwe.',
+  },
+  {
+    year: '2011',
+    text: 'Begin judging at the annual Chisipite Senior School Science Fair, which aims to increase the number of women in science.',
+  },
+  {
+    year: '2012',
+    text: 'The REDD+ project receives Climate Community Biodiversity Standard (February) and Voluntary Carbon Standard (September) validation.',
+  },
+  {
+    year: '2017',
+    text: 'Report on the biodiversity, conservation and cultural heritage importance of the Mavhuradonha Wilderness Area; the area is gazetted as a National Monument in early 2017.',
+  },
+  { year: '2018', text: 'Join the mentoring team for Enactus Zimbabwe and Boost Fellowship.' },
+  {
+    year: '2019',
+    text: 'Begin a series of national clean-up campaigns in line with the Presidential clean-up initiative.',
+  },
+  { year: '2020', text: 'Registered as a Private Limited Company in South Africa.' },
+  {
+    year: '2021–22',
+    text: 'ESIAs to International Finance Corporation standards for platinum mining, a wind project and a Renewable Energy Technology Park.',
+  },
+  {
+    year: '2024',
+    text: 'Environmental and social site assessments for health centres with NMSI Infrastructure Limited and the Ministry of Health and Child Care.',
+  },
+];
+
+const csr = [
+  {
+    title: 'Enactus Zimbabwe & Boost Fellowship',
+    text: 'In 2016 we donated t-shirts and caps to the Chinhoyi University of Technology team representing Zimbabwe at the Enactus World Cup, where they finished among the top eight teams. In 2017 we ran a training exercise for Enactus students on the environment, recycling and Sustainable Development Goal 12, and in 2018 we joined the mentoring team for Enactus Zimbabwe and Boost Fellowship.',
+  },
+  {
+    title: 'Natural History Museum of Zimbabwe',
+    text: 'In 2015 we donated towards "Natural History Museum of Zimbabwe: A Guide Book", published by the Friends of the National Museums & Monuments of Zimbabwe.',
+  },
+  {
+    title: 'National tree planting',
+    text: "We have held tree-planting ceremonies with clients, including St Peter's Kubatana High School with the Jesuits Province of Zimbabwe, Chikurubi Primary School, and Unilever Zimbabwe at Glen Norah Park, Harare.",
+  },
+  {
+    title: 'Chisipite Senior School Science Fair',
+    text: 'Every year since 2011 we have judged the Chisipite Senior School Science Fair, which aims to increase the number of women in science. In 2011 we also sponsored a poetry competition for World Youth Day for pupils at Chisipite Junior and Chikurubi Primary schools.',
+  },
+  {
+    title: 'Caring for the environment',
+    text: 'In 2019 we began a series of national clean-up campaigns in line with the Presidential clean-up initiative. Together, we can make the planet cleaner — reduce, reuse, recycle.',
+  },
+];
+---
+
+<BaseLayout
+  title="About us"
+  description="Established in Harare in 2005, Black Crystal Consulting is an environmental, socio-economic and cultural heritage consultancy with over 40 years of combined experience."
+  jsonLd={breadcrumbJsonLd(site, [
+    { name: 'Home', href: '/' },
+    { name: 'About', href: '/about/' },
+  ])}
+>
+  <PageHero
+    title="People. Expertise. A sustainable future."
+    eyebrow="About Black Crystal"
+    lead={about.intro}
+    image="profile-zebras"
+  />
+
+  <section class="section" id="story" aria-labelledby="story-title">
+    <div class="story container container--wide">
+      <div class="story__text" data-reveal>
+        <p class="eyebrow">Our story</p>
+        <h2 id="story-title">Caring for the environment beyond today.</h2>
+        <p class="lead">{about.approach}</p>
+        <p>{about.teams}</p>
+        <p>{about.clients}</p>
+        <p>{about.commitment}</p>
+      </div>
+      <aside class="facts-card" aria-labelledby="facts-title" data-reveal>
+        <h2 id="facts-title">Key facts</h2>
+        <dl>
+          {facts.map((f) => (
+            <div>
+              <dt>{f.label}</dt>
+              <dd>{f.value}</dd>
+            </div>
+          ))}
+          <div>
+            <dt>Registration</dt>
+            <dd>{company.emaRegistration.text}</dd>
+          </div>
+        </dl>
+        <p class="facts-card__source">Source: Black Crystal Company Profile 2024.</p>
+      </aside>
+    </div>
+  </section>
+
+  <section class="vm on-dark" id="vision" aria-labelledby="vm-title">
+    <h2 id="vm-title" class="visually-hidden">
+      Vision and mission
+    </h2>
+    <div class="vm__grid container container--wide">
+      <div class="vm__item" data-reveal>
+        <p class="eyebrow">Our vision</p>
+        <p class="vm__text">{about.vision}</p>
+      </div>
+      <div class="vm__item" data-reveal>
+        <p class="eyebrow">Our mission</p>
+        <p class="vm__text">{about.mission}</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--warm" id="values" aria-labelledby="values-title">
+    <div class="container container--wide">
+      <div class="section-head">
+        <div class="section-head__text">
+          <p class="eyebrow">Key values</p>
+          <h2 id="values-title">What guides our work.</h2>
+        </div>
+      </div>
+      <ul class="values" role="list">
+        {about.values.map((v, i) => (
+          <li data-reveal data-reveal-step={String(i % 4)}>
+            <Icon name={v.icon} size={30} strokeWidth={1.5} />
+            <h3>{v.title}</h3>
+            {'detail' in v && <p>{v.detail}</p>}
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <section class="section" id="milestones" aria-labelledby="milestones-title">
+    <div class="container container--wide">
+      <div class="section-head">
+        <div class="section-head__text">
+          <p class="eyebrow">Milestones</p>
+          <h2 id="milestones-title">Nearly two decades of documented work.</h2>
+          <p>Selected milestones recorded in our 2024 company profile.</p>
+        </div>
+        <a href="/projects/" class="link-arrow">
+          Explore the project record <Icon name="arrow-right" />
+        </a>
+      </div>
+      <ol class="timeline" role="list">
+        {milestones.map((m) => (
+          <li data-reveal>
+            <span class="timeline__year">{m.year}</span>
+            <p>{m.text}</p>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <section class="section section--cream" id="community" aria-labelledby="community-title">
+    <div class="community container container--wide">
+      <div class="community__intro">
+        <p class="eyebrow">Corporate social responsibility</p>
+        <h2 id="community-title">Contributing beyond our assignments.</h2>
+        <p>
+          Since 2005, Black Crystal has contributed to the preservation of our natural environment through a
+          range of initiatives, as part of our mission of caring for the environment beyond today.
+        </p>
+        <div class="community__images">
+          <div class="organic-tall">
+            <MediaImage
+              name="profile-tree-planting"
+              widths={[400, 640, 900]}
+              sizes="(min-width: 1024px) 26vw, 90vw"
+            />
+          </div>
+          <div class="organic-wide">
+            <MediaImage
+              name="profile-clean-up"
+              widths={[400, 640, 900]}
+              sizes="(min-width: 1024px) 26vw, 90vw"
+            />
+          </div>
+        </div>
+      </div>
+      <ul class="csr" role="list">
+        {csr.map((c) => (
+          <li data-reveal>
+            <h3>{c.title}</h3>
+            <p>{c.text}</p>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <section class="recognition section" aria-labelledby="recognition-title">
+    <div class="recognition__inner container container--wide">
+      <Icon name="award" size={48} strokeWidth={1.3} class="recognition__icon" />
+      <div>
+        <p class="eyebrow">Recognition</p>
+        <h2 id="recognition-title">
+          {company.award.year} {company.award.title}
+        </h2>
+        <p>{company.award.result}, as recorded in our 2024 company profile.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--warm" id="offices" aria-labelledby="offices-title">
+    <div class="container container--wide">
+      <div class="section-head">
+        <div class="section-head__text">
+          <p class="eyebrow">Our offices</p>
+          <h2 id="offices-title">Zimbabwe and South Africa.</h2>
+        </div>
+        <a href="/contact/" class="link-arrow">
+          Contact us <Icon name="arrow-right" />
+        </a>
+      </div>
+      <ul class="offices" role="list">
+        {contact.offices.map((o) => (
+          <li>
+            <Icon name="building" size={28} strokeWidth={1.5} />
+            <h3>{o.country}</h3>
+            <p class="offices__role">{o.role}</p>
+            <address>
+              {o.lines.map((l) => (
+                <span>{l}</span>
+              ))}
+            </address>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <CtaBand />
+</BaseLayout>
+
+<style>
+  .story {
+    display: grid;
+    grid-template-columns: minmax(0, 1.5fr) minmax(300px, 1fr);
+    gap: clamp(32px, 5vw, 80px);
+    align-items: start;
+  }
+  .story__text h2 {
+    margin-bottom: 18px;
+  }
+  .story__text p:not(.eyebrow):not(.lead) {
+    max-width: 66ch;
+    margin-top: 14px;
+    color: var(--color-muted);
+    font-size: 1.0625rem;
+  }
+  .facts-card {
+    padding: 26px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: #fff;
+    box-shadow: var(--shadow-subtle);
+  }
+  .facts-card h2 {
+    margin-bottom: 8px;
+    font-size: 1.2rem;
+  }
+  .facts-card dl div {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .facts-card dt {
+    color: var(--color-muted);
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .facts-card dd {
+    margin: 2px 0 0;
+    font-weight: 650;
+    line-height: 1.45;
+  }
+  .facts-card__source {
+    margin-top: 12px;
+    color: var(--color-muted);
+    font-size: 0.75rem;
+  }
+  .vm {
+    background: linear-gradient(135deg, #2f4a36 0%, var(--color-panel) 50%, var(--color-panel-deep) 100%);
+  }
+  .vm__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .vm__item {
+    padding: clamp(40px, 6vw, 80px) clamp(0px, 3vw, 48px);
+  }
+  .vm__item + .vm__item {
+    border-left: 1px solid rgb(255 255 255 / 14%);
+  }
+  .vm__text {
+    max-width: 46ch;
+    font-size: clamp(1.25rem, 1.9vw, 1.65rem);
+    font-weight: 650;
+    line-height: 1.45;
+  }
+  .values {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+  }
+  .values li {
+    display: grid;
+    align-content: start;
+    gap: 8px;
+    padding: 24px;
+    border-radius: var(--radius-lg);
+    background: #fff;
+    border: 1px solid var(--color-border);
+  }
+  .values :global(svg) {
+    color: var(--bc-gold);
+    margin-bottom: 6px;
+  }
+  .values h3 {
+    font-size: 1.075rem;
+  }
+  .values p {
+    color: var(--color-muted);
+    font-size: 0.9rem;
+  }
+  .timeline {
+    position: relative;
+    display: grid;
+    gap: 0;
+  }
+  .timeline li {
+    position: relative;
+    display: grid;
+    grid-template-columns: 110px minmax(0, 1fr);
+    gap: 24px;
+    padding: 0 0 26px 0;
+  }
+  .timeline li::before {
+    content: '';
+    position: absolute;
+    left: 118px;
+    top: 10px;
+    bottom: -10px;
+    width: 2px;
+    background: var(--color-border);
+  }
+  .timeline li:last-child::before {
+    display: none;
+  }
+  .timeline li::after {
+    content: '';
+    position: absolute;
+    left: 113px;
+    top: 6px;
+    width: 12px;
+    height: 12px;
+    border: 2px solid var(--bc-gold);
+    border-radius: 50%;
+    background: #fff;
+  }
+  .timeline__year {
+    color: var(--color-gold-readable);
+    font-size: 1.25rem;
+    font-weight: 850;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.2;
+  }
+  .timeline p {
+    max-width: 70ch;
+    padding-left: 24px;
+    font-size: 1.0625rem;
+  }
+  .community {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
+    gap: clamp(32px, 5vw, 72px);
+    align-items: start;
+  }
+  .community__intro p:not(.eyebrow) {
+    margin-top: 14px;
+    color: var(--color-muted);
+  }
+  .community__images {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 28px;
+  }
+  .community__images :global(img) {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+  }
+  .csr {
+    display: grid;
+    gap: 14px;
+  }
+  .csr li {
+    padding: 22px 24px;
+    border-left: 3px solid var(--bc-green);
+    border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+    background: #fff;
+  }
+  .csr h3 {
+    margin-bottom: 6px;
+    font-size: 1.1rem;
+  }
+  .csr p {
+    color: var(--color-muted);
+    font-size: 0.9375rem;
+  }
+  .recognition__inner {
+    display: flex;
+    gap: 24px;
+    align-items: center;
+    padding: clamp(24px, 3vw, 36px);
+    border: 1px solid #ecd39c;
+    border-radius: var(--radius-lg);
+    background: linear-gradient(120deg, #fffaf0, #fff);
+  }
+  :global(.recognition__icon) {
+    flex: none;
+    color: var(--bc-gold);
+  }
+  .recognition h2 {
+    font-size: clamp(1.4rem, 2.2vw, 1.9rem);
+  }
+  .recognition p:not(.eyebrow) {
+    margin-top: 6px;
+    color: var(--color-muted);
+  }
+  .offices {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+  .offices li {
+    padding: 28px;
+    border-radius: var(--radius-lg);
+    background: #fff;
+    border: 1px solid var(--color-border);
+  }
+  .offices :global(svg) {
+    color: var(--bc-green);
+    margin-bottom: 12px;
+  }
+  .offices h3 {
+    font-size: 1.3rem;
+  }
+  .offices__role {
+    color: var(--color-gold-readable);
+    font-size: 0.8125rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .offices address {
+    display: grid;
+    margin-top: 12px;
+    font-style: normal;
+    line-height: 1.6;
+  }
+  @media (max-width: 1023.98px) {
+    .story,
+    .community {
+      grid-template-columns: 1fr;
+    }
+    .values {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (max-width: 699.98px) {
+    .vm__grid,
+    .offices {
+      grid-template-columns: 1fr;
+    }
+    .vm__item + .vm__item {
+      border-left: 0;
+      border-top: 1px solid rgb(255 255 255 / 14%);
+    }
+    .vm__item {
+      padding-inline: 0;
+    }
+    .timeline li {
+      grid-template-columns: 1fr;
+      gap: 6px;
+      padding-left: 28px;
+    }
+    .timeline li::before {
+      left: 5px;
+    }
+    .timeline li::after {
+      left: 0;
+    }
+    .timeline p {
+      padding-left: 0;
+    }
+  }
+  @media (max-width: 449.98px) {
+    .values {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

@@ -1,0 +1,133 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../../components/ui/PageHero.astro';
+import CtaBand from '../../components/ui/CtaBand.astro';
+import Icon from '../../components/ui/Icon.astro';
+import MediaImage from '../../components/ui/MediaImage.astro';
+import { getProjects, getSectors } from '../../lib/content';
+import { breadcrumbJsonLd } from '../../lib/seo';
+
+const sectors = await getSectors();
+const projects = await getProjects();
+const countFor = (id: string) => projects.filter((p) => (p.data.sectors as string[]).includes(id)).length;
+const site = Astro.site ?? new URL('https://blackcrystal.co.zw');
+---
+
+<BaseLayout
+  title="Sectors"
+  description="Environmental and social advisory for mining, conventional and renewable energy, infrastructure and construction, housing and tourism in southern Africa."
+  jsonLd={breadcrumbJsonLd(site, [
+    { name: 'Home', href: '/' },
+    { name: 'Sectors', href: '/sectors/' },
+  ])}
+>
+  <PageHero
+    title="Real challenges. Balanced solutions."
+    eyebrow="Sectors"
+    lead="Our specialist sectors, as set out in our 2024 company profile: construction and infrastructure, conventional and renewable energy, housing, minerals and mining, and tourism."
+    image="banner-landscape"
+  />
+
+  <section class="section">
+    <div class="container container--wide">
+      <ul class="sector-list" role="list">
+        {sectors.map((s, i) => (
+          <li class="sector-row card-link" data-reveal>
+            <div class:list={['sector-row__media media-zoom', i % 2 ? 'organic-tall' : 'organic-wide']}>
+              <MediaImage
+                name={s.data.heroImage}
+                widths={[480, 720, 960, 1280]}
+                sizes="(min-width: 900px) 45vw, 100vw"
+                alt=""
+              />
+            </div>
+            <div class="sector-row__body">
+              <span class="sector-row__icon">
+                <Icon name={s.data.icon} size={26} strokeWidth={1.5} />
+              </span>
+              <h2>
+                <a class="stretched" href={`/sectors/${s.id}/`}>
+                  {s.data.title}
+                </a>
+              </h2>
+              <p>{s.data.summary}</p>
+              <p class="sector-row__meta">
+                {countFor(s.id) > 0
+                  ? `${countFor(s.id)} documented project${countFor(s.id) === 1 ? '' : 's'}`
+                  : 'Specialist sector'}
+                <Icon name="arrow-right" size={16} />
+              </p>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <CtaBand />
+</BaseLayout>
+
+<style>
+  .sector-list {
+    display: grid;
+    gap: clamp(28px, 4vw, 56px);
+  }
+  .sector-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    gap: clamp(24px, 4vw, 64px);
+    align-items: center;
+  }
+  .sector-row:nth-child(even) .sector-row__media {
+    order: 2;
+  }
+  .sector-row__media :global(img) {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+  }
+  .sector-row__icon {
+    display: inline-grid;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+    margin-bottom: 16px;
+    border-radius: 50%;
+    background: #eef2ea;
+    color: var(--color-green-readable);
+  }
+  .sector-row h2 {
+    font-size: clamp(1.7rem, 2.6vw, 2.4rem);
+  }
+  .sector-row h2 a {
+    color: inherit;
+    text-decoration: none;
+  }
+  .sector-row:hover h2 a {
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+  }
+  .sector-row__body > p {
+    max-width: 52ch;
+    margin-top: 12px;
+    color: var(--color-muted);
+    font-size: 1.0625rem;
+  }
+  .sector-row__body .sector-row__meta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 16px;
+    color: var(--color-gold-readable);
+    font-size: 0.875rem;
+    font-weight: 800;
+  }
+  @media (max-width: 899.98px) {
+    .sector-row {
+      grid-template-columns: 1fr;
+    }
+    .sector-row:nth-child(even) .sector-row__media {
+      order: 0;
+    }
+  }
+</style>

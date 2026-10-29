@@ -1,0 +1,99 @@
+---
+import Icon from '../ui/Icon.astro';
+import { credibility } from '../../data/site';
+---
+
+<section class="credibility" id="at-a-glance" aria-labelledby="credibility-title">
+  <h2 id="credibility-title" class="visually-hidden">
+    Black Crystal at a glance
+  </h2>
+  <ul class="credibility__list container container--wide" role="list">
+    {credibility.map((item) => (
+      <li class="credibility__item">
+        <Icon name={item.icon} size={36} strokeWidth={1.4} class="credibility__icon" />
+        <div>
+          <p class="credibility__value">{item.value}</p>
+          <p class="credibility__label">{item.label}</p>
+        </div>
+      </li>
+    ))}
+  </ul>
+  <p class="credibility__source container container--wide">Source: Black Crystal Company Profile 2024.</p>
+</section>
+
+<style>
+  .credibility {
+    position: relative;
+    z-index: 1;
+    background: #fff;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .credibility__list {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    padding-block: clamp(26px, 3vw, 38px) 10px;
+  }
+  .credibility__item {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding-inline: clamp(12px, 2vw, 32px);
+    border-left: 1px solid var(--color-border);
+  }
+  .credibility__item:first-child {
+    padding-left: 0;
+    border-left: 0;
+  }
+  :global(.credibility__icon) {
+    flex: none;
+    margin-top: 2px;
+    color: var(--bc-gold);
+  }
+  .credibility__value {
+    color: var(--bc-thunder);
+    font-size: clamp(1.15rem, 1.55vw, 1.5rem);
+    font-weight: 850;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+  }
+  .credibility__label {
+    margin-top: 4px;
+    color: var(--color-muted);
+    font-size: 0.875rem;
+    line-height: 1.45;
+  }
+  .credibility__source {
+    padding-bottom: 14px;
+    color: var(--color-muted);
+    font-size: 0.75rem;
+    text-align: right;
+  }
+  @media (max-width: 1023.98px) {
+    .credibility__list {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      row-gap: 22px;
+    }
+    .credibility__item:nth-child(3) {
+      padding-left: 0;
+      border-left: 0;
+    }
+  }
+  @media (max-width: 519.98px) {
+    .credibility__list {
+      grid-template-columns: 1fr;
+      row-gap: 0;
+      padding-top: 8px;
+    }
+    .credibility__item {
+      padding: 16px 0;
+      border-left: 0;
+      border-top: 1px solid var(--color-border);
+    }
+    .credibility__item:first-child {
+      border-top: 0;
+    }
+    .credibility__source {
+      text-align: left;
+    }
+  }
+</style>

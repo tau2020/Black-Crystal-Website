@@ -1,0 +1,339 @@
+---
+import { getImage } from 'astro:assets';
+import Icon from '../ui/Icon.astro';
+import Contours from '../ui/Contours.astro';
+import posterDesktop from '../../assets/images/hero/poster-desktop.png';
+import posterMobile from '../../assets/images/hero/poster-mobile.png';
+
+// Posters are frame 0 of the looped video derivatives (see VIDEO_ASSET_LOG.md), so the swap to video is seamless.
+const [dAvif, dWebp, mAvif640, mAvif, mWebp640, mWebp] = await Promise.all([
+  getImage({ src: posterDesktop, format: 'avif', width: 1280, quality: 62 }),
+  getImage({ src: posterDesktop, format: 'webp', width: 1280, quality: 80 }),
+  getImage({ src: posterMobile, format: 'avif', width: 640, quality: 62 }),
+  getImage({ src: posterMobile, format: 'avif', width: 960, quality: 62 }),
+  getImage({ src: posterMobile, format: 'webp', width: 640, quality: 80 }),
+  getImage({ src: posterMobile, format: 'webp', width: 960, quality: 80 }),
+]);
+const MOBILE = '(max-width: 599.98px)';
+---
+
+<section class="hero" aria-labelledby="hero-title" data-hero>
+  <div class="hero__media">
+    <picture>
+      <source
+        media={MOBILE}
+        type="image/avif"
+        srcset={`${mAvif640.src} 640w, ${mAvif.src} 960w`}
+        sizes="100vw"
+      />
+      <source
+        media={MOBILE}
+        type="image/webp"
+        srcset={`${mWebp640.src} 640w, ${mWebp.src} 960w`}
+        sizes="100vw"
+      />
+      <source type="image/avif" srcset={`${dAvif.src} 1280w`} sizes="100vw" />
+      <img
+        class="hero__poster"
+        src={dWebp.src}
+        srcset={`${dWebp.src} 1280w`}
+        sizes="100vw"
+        width="1280"
+        height="720"
+        alt=""
+        fetchpriority="high"
+        loading="eager"
+        decoding="async"
+      />
+    </picture>
+    <video
+      class="hero__video"
+      muted
+      loop
+      playsinline
+      preload="none"
+      disablepictureinpicture
+      disableRemotePlayback
+      aria-hidden="true"
+      tabindex="-1"
+      data-hero-video
+      data-src-desktop="/media/hero/hero-desktop-1280x720.mp4"
+      data-src-mobile="/media/hero/hero-mobile-960x720.mp4"
+      data-mobile-query={MOBILE}
+    ></video>
+    <div class="hero__shade" aria-hidden="true"></div>
+    <Contours class="hero__contours" />
+  </div>
+
+  <div class="hero__body container container--wide">
+    <div class="hero__content">
+      <p class="eyebrow hero__eyebrow">Environmental &amp; Social Advisory</p>
+      <h1 id="hero-title" class="hero__title">
+        Sustainable Development for <span class="hero__accent">Thriving Communities.</span>
+      </h1>
+      <p class="hero__lead">
+        We help organisations develop responsibly through expert environmental, social and cultural heritage
+        advisory services.
+      </p>
+      <div class="hero__actions">
+        <a href="/services/" class="btn btn--primary">
+          Explore Our Services <Icon name="arrow-right" />
+        </a>
+        <a href="/contact/" class="btn btn--outline-light">
+          Discuss Your Project
+        </a>
+      </div>
+    </div>
+    <a href="#at-a-glance" class="hero__scroll">
+      <span class="hero__scroll-text" aria-hidden="true">
+        Scroll
+      </span>
+      <span class="hero__scroll-icon">
+        <Icon name="arrow-down" size={18} />
+      </span>
+      <span class="visually-hidden">Skip to the next section</span>
+    </a>
+  </div>
+  <button type="button" class="hero__toggle" data-hero-toggle hidden>
+    <span class="hero__toggle-icon" data-hero-icon="pause">
+      <Icon name="pause" size={18} strokeWidth={2.4} />
+    </span>
+    <span class="hero__toggle-icon" data-hero-icon="play" hidden>
+      <Icon name="play" size={18} strokeWidth={2} />
+    </span>
+    <span class="visually-hidden" data-hero-label>
+      Pause background video
+    </span>
+  </button>
+</section>
+
+<script>
+  import { initHeroVideo } from '../../scripts/hero-video';
+  const hero = document.querySelector<HTMLElement>('[data-hero]');
+  if (hero) initHeroVideo(hero);
+</script>
+
+<style>
+  .hero {
+    position: relative;
+    display: grid;
+    min-height: clamp(560px, calc(100svh - var(--header-h) - 36px), 860px);
+    overflow: hidden;
+    background: var(--color-night);
+    color: #fff;
+    isolation: isolate;
+  }
+  .hero__media {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+  }
+  .hero__poster,
+  .hero__video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 68% 56%;
+  }
+  .hero__video {
+    opacity: 0;
+    transition: opacity 900ms var(--ease-standard);
+  }
+  .hero.is-video-ready .hero__video {
+    opacity: 1;
+  }
+  .hero__shade {
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(
+        90deg,
+        rgb(18 14 11 / 84%) 0%,
+        rgb(18 14 11 / 70%) 24%,
+        rgb(18 14 11 / 34%) 46%,
+        rgb(18 14 11 / 0%) 64%
+      ),
+      linear-gradient(0deg, rgb(18 14 11 / 42%) 0%, rgb(18 14 11 / 0%) 32%);
+  }
+  :global(.hero__contours) {
+    position: absolute;
+    right: -6%;
+    bottom: -18%;
+    width: min(46vw, 640px);
+    height: auto;
+    color: #f1d38f;
+    opacity: 0.28;
+    pointer-events: none;
+  }
+
+  .hero__body {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    padding-block: clamp(56px, 8vh, 96px);
+  }
+  .hero__content {
+    max-width: 620px;
+  }
+  .hero__eyebrow {
+    margin-bottom: 18px;
+    color: var(--color-gold-on-dark);
+    text-shadow: 0 1px 12px rgb(0 0 0 / 35%);
+  }
+  .hero__title {
+    max-width: 12.5ch;
+    color: #fff;
+    font-size: clamp(2.6rem, 4.6vw, 4.85rem);
+    font-weight: 850;
+    line-height: 1.02;
+    letter-spacing: -0.028em;
+    text-wrap: balance;
+    text-shadow: 0 2px 24px rgb(0 0 0 / 28%);
+  }
+  .hero__accent {
+    color: var(--bc-gold);
+  }
+  .hero__lead {
+    max-width: 46ch;
+    margin-top: 22px;
+    color: rgb(255 255 255 / 92%);
+    font-size: clamp(1.02rem, 1.2vw, 1.175rem);
+    line-height: 1.6;
+    text-shadow: 0 1px 14px rgb(0 0 0 / 35%);
+  }
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-top: 32px;
+  }
+
+  .hero__scroll {
+    align-self: end;
+    display: grid;
+    justify-items: center;
+    gap: 14px;
+    margin-bottom: 8px;
+    color: #fff;
+    text-decoration: none;
+  }
+  .hero__scroll-text {
+    writing-mode: vertical-rl;
+    font-size: 0.6875rem;
+    font-weight: 800;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    opacity: 0.85;
+  }
+  .hero__scroll-icon {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border: 1px solid rgb(255 255 255 / 70%);
+    border-radius: 50%;
+    transition:
+      background-color var(--duration-base) var(--ease-standard),
+      transform var(--duration-base) var(--ease-standard);
+  }
+  .hero__scroll:hover .hero__scroll-icon {
+    background: rgb(255 255 255 / 14%);
+    transform: translateY(2px);
+  }
+
+  .hero__toggle {
+    position: absolute;
+    left: max(var(--gutter), calc((100% - var(--container-wide)) / 2));
+    bottom: 22px;
+    z-index: 3;
+    display: inline-grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 1px solid rgb(255 255 255 / 55%);
+    border-radius: 50%;
+    background: rgb(18 14 11 / 45%);
+    color: #fff;
+    transition: background-color var(--duration-base) var(--ease-standard);
+  }
+  .hero__toggle:hover {
+    background: rgb(18 14 11 / 62%);
+  }
+
+  /* Small desktops / landscape tablets: keep the copy clear of the elephant's trunk. */
+  @media (min-width: 900px) and (max-width: 1199.98px) {
+    .hero__content {
+      max-width: 450px;
+    }
+    .hero__title {
+      font-size: clamp(2.6rem, 4.4vw, 3.3rem);
+    }
+    .hero__lead {
+      max-width: 36ch;
+    }
+  }
+
+  /* Tablet portrait and phones: elephant first, copy on a dark panel beneath. */
+  @media (max-width: 899.98px) {
+    .hero {
+      display: block;
+      min-height: 0;
+    }
+    .hero__media {
+      position: relative;
+      aspect-ratio: 16 / 10;
+    }
+    .hero__poster,
+    .hero__video {
+      object-position: 62% 50%;
+    }
+    .hero__shade {
+      background:
+        linear-gradient(180deg, rgb(18 14 11 / 0%) 55%, var(--color-night) 100%),
+        linear-gradient(90deg, rgb(18 14 11 / 25%) 0%, rgb(18 14 11 / 0%) 45%);
+    }
+    :global(.hero__contours) {
+      display: none;
+    }
+    .hero__body {
+      grid-template-columns: 1fr;
+      margin-top: -44px;
+      padding-block: 0 44px;
+    }
+    .hero__toggle {
+      left: auto;
+      right: 12px;
+      top: 12px;
+      bottom: auto;
+    }
+    .hero__scroll {
+      display: none;
+    }
+  }
+  @media (max-width: 599.98px) {
+    .hero__media {
+      aspect-ratio: 4 / 3.2;
+    }
+    .hero__poster,
+    .hero__video {
+      object-position: 55% 45%;
+    }
+    .hero__body {
+      margin-top: -30px;
+    }
+    .hero__title {
+      font-size: clamp(2.3rem, 10.4vw, 3rem);
+    }
+    .hero__actions {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .hero__actions .btn {
+      width: 100%;
+    }
+  }
+</style>

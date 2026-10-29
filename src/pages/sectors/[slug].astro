@@ -1,0 +1,238 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../../components/ui/PageHero.astro';
+import CtaBand from '../../components/ui/CtaBand.astro';
+import Icon from '../../components/ui/Icon.astro';
+import ProjectCard from '../../components/projects/ProjectCard.astro';
+import { getProjects, getSectors, getServices, serviceCategoryOf, type Sector } from '../../lib/content';
+import { sectorShortLabels } from '../../data/site';
+import { breadcrumbJsonLd } from '../../lib/seo';
+
+export const getStaticPaths = (async () => {
+  const sectors = await getSectors();
+  return sectors.map((sector) => ({ params: { slug: sector.id }, props: { sector } }));
+}) satisfies GetStaticPaths;
+
+interface Props {
+  sector: Sector;
+}
+const { sector } = Astro.props;
+const { Content } = await render(sector);
+const d = sector.data;
+const allServices = await getServices();
+const relevant = d.services
+  .map((ref) => allServices.find((s) => s.id === ref.id))
+  .filter((s): s is NonNullable<typeof s> => !!s);
+const projects = (await getProjects()).filter((p) => (p.data.sectors as string[]).includes(sector.id));
+const shown = projects.slice(0, 6);
+const countSentence =
+  projects.length === 1
+    ? '1 assignment in our 2024 company profile relates to this sector.'
+    : `${projects.length} assignments in our 2024 company profile relate to this sector, most recent first.`;
+const site = Astro.site ?? new URL('https://blackcrystal.co.zw');
+const path = `/sectors/${sector.id}/`;
+---
+
+<BaseLayout
+  title={d.title}
+  description={d.seoDescription}
+  jsonLd={breadcrumbJsonLd(site, [
+    { name: 'Home', href: '/' },
+    { name: 'Sectors', href: '/sectors/' },
+    { name: d.title, href: path },
+  ])}
+>
+  <PageHero
+    title={d.title}
+    eyebrow="Sector"
+    lead={d.summary}
+    image={d.heroImage}
+    crumbs={[{ name: 'Sectors', href: '/sectors/' }]}
+  />
+
+  <section class="section">
+    <div class="sector-detail container container--wide">
+      <article class="prose">
+        <Content />
+      </article>
+      <aside class="considerations" aria-labelledby="considerations-title">
+        <h2 id="considerations-title">Typical environmental and social considerations</h2>
+        <ul role="list">
+          {d.considerations.map((c) => (
+            <li>
+              <Icon name="check-circle" size={20} />
+              {c}
+            </li>
+          ))}
+        </ul>
+        <p class="considerations__note">Indicative only — every project is scoped individually.</p>
+      </aside>
+    </div>
+  </section>
+
+  <section class="section section--cream" aria-labelledby="relevant-title">
+    <div class="container container--wide">
+      <div class="section-head">
+        <div class="section-head__text">
+          <p class="eyebrow">Relevant services</p>
+          <h2 id="relevant-title">How we help {d.shortTitle.toLowerCase()} clients</h2>
+        </div>
+        <a href="/services/" class="link-arrow">
+          All services <Icon name="arrow-right" />
+        </a>
+      </div>
+      <ul class="relevant-grid" role="list">
+        {relevant.map((s) => (
+          <li class="relevant card-link">
+            <Icon name={s.data.icon} size={24} strokeWidth={1.5} class="relevant__icon" />
+            <h3>
+              <a class="stretched" href={`/services/${s.id}/`}>
+                {s.data.title}
+              </a>
+            </h3>
+            <p>{s.data.summary}</p>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="sector-projects-title">
+    <div class="container container--wide">
+      <div class="section-head">
+        <div class="section-head__text">
+          <p class="eyebrow">Documented projects</p>
+          <h2 id="sector-projects-title">{d.shortTitle} work in our profile</h2>
+          {projects.length > 0 ? (
+            <p>{countSentence}</p>
+          ) : (
+            <p>No assignments in this sector are itemised in the 2024 profile project list.</p>
+          )}
+        </div>
+        {projects.length > shown.length && (
+          <a href={`/projects/?sector=${sector.id}`} class="link-arrow">
+            View all {projects.length} <Icon name="arrow-right" />
+          </a>
+        )}
+      </div>
+      {shown.length > 0 && (
+        <ul class="project-grid" role="list">
+          {shown.map((project) => (
+            <ProjectCard
+              project={project}
+              categories={serviceCategoryOf(
+                allServices,
+                project.data.services.map((r) => r.id),
+              )}
+              sectorLabels={sectorShortLabels}
+            />
+          ))}
+        </ul>
+      )}
+    </div>
+  </section>
+
+  <CtaBand />
+</BaseLayout>
+
+<style>
+  .sector-detail {
+    display: grid;
+    grid-template-columns: minmax(0, 1.6fr) minmax(300px, 1fr);
+    gap: clamp(32px, 5vw, 80px);
+    align-items: start;
+  }
+  .considerations {
+    position: sticky;
+    top: calc(var(--header-h) + 24px);
+    padding: 26px;
+    border-radius: var(--radius-lg);
+    background: var(--color-panel);
+    color: #fff;
+  }
+  .considerations h2 {
+    margin-bottom: 16px;
+    color: #fff;
+    font-size: 1.2rem;
+    line-height: 1.3;
+  }
+  .considerations ul {
+    display: grid;
+    gap: 12px;
+  }
+  .considerations li {
+    display: flex;
+    gap: 12px;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+  }
+  .considerations :global(svg) {
+    flex: none;
+    color: var(--bc-gold);
+  }
+  .considerations__note {
+    margin-top: 16px;
+    color: var(--color-on-dark-muted);
+    font-size: 0.8125rem;
+  }
+  .relevant-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+  }
+  .relevant {
+    display: grid;
+    gap: 8px;
+    align-content: start;
+    padding: 22px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: #fff;
+    transition: box-shadow var(--duration-base) var(--ease-standard);
+  }
+  .relevant:hover {
+    box-shadow: var(--shadow-raised);
+  }
+  :global(.relevant__icon) {
+    color: var(--bc-gold);
+  }
+  .relevant h3 {
+    font-size: 1.0625rem;
+  }
+  .relevant h3 a {
+    color: inherit;
+    text-decoration: none;
+  }
+  .relevant:hover h3 a {
+    text-decoration: underline;
+  }
+  .relevant p {
+    color: var(--color-muted);
+    font-size: 0.9rem;
+  }
+  .project-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+  }
+  @media (max-width: 1023.98px) {
+    .sector-detail {
+      grid-template-columns: 1fr;
+    }
+    .considerations {
+      position: static;
+    }
+    .relevant-grid,
+    .project-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (max-width: 599.98px) {
+    .relevant-grid,
+    .project-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

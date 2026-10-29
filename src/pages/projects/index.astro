@@ -1,0 +1,655 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../../components/ui/PageHero.astro';
+import CtaBand from '../../components/ui/CtaBand.astro';
+import Icon from '../../components/ui/Icon.astro';
+import ProjectCard from '../../components/projects/ProjectCard.astro';
+import { getProjects, getServices, serviceCategoryOf } from '../../lib/content';
+import {
+  periodBuckets,
+  portfolioGroups,
+  sectorShortLabels,
+  serviceCategories,
+  sectorIds,
+} from '../../data/site';
+import { breadcrumbJsonLd } from '../../lib/seo';
+
+const projects = await getProjects();
+const services = await getServices();
+const site = Astro.site ?? new URL('https://blackcrystal.co.zw');
+
+// ── Portfolio at a glance (derived from the documented records on this page) ──
+const total = projects.length;
+const years = projects.flatMap((p) => (p.data.start !== undefined ? [p.data.start] : []));
+const minYear = Math.min(...years);
+const maxYear = Math.max(...projects.flatMap((p) => [p.data.end ?? p.data.start ?? 0]));
+const byGroup = (Object.keys(portfolioGroups) as (keyof typeof portfolioGroups)[])
+  .map((g) => ({ label: portfolioGroups[g], count: projects.filter((p) => p.data.portfolio === g).length }))
+  .sort((a, b) => b.count - a.count);
+const groupMax = Math.max(...byGroup.map((g) => g.count));
+const byYear = Array.from({ length: maxYear - minYear + 1 }, (_, i) => minYear + i).map((year) => ({
+  year,
+  count: projects.filter((p) => p.data.start === year).length,
+}));
+const yearMax = Math.max(...byYear.map((y) => y.count));
+const noYear = projects.filter((p) => p.data.start === undefined).length;
+const ifcCount = projects.filter((p) => p.data.standards.some((s) => s.includes('IFC'))).length;
+const reviewCount = projects.filter((p) => p.data.portfolio === 'technical-review').length;
+const pct = (n: number, max: number) => Math.max(2, Math.round((n / max) * 100));
+const barClass = (n: number, max: number) => `w-${Math.round(pct(n, max) / 5) * 5}`;
+---
+
+<BaseLayout
+  title="Projects"
+  description="Documented environmental and social assignments from Black Crystal's 2024 company profile — mining, energy, infrastructure, tourism, sustainability, training and technical review."
+  jsonLd={breadcrumbJsonLd(site, [
+    { name: 'Home', href: '/' },
+    { name: 'Projects', href: '/projects/' },
+  ])}
+>
+  <PageHero
+    title="Project portfolio"
+    eyebrow="Projects"
+    lead={`Assignments documented in our 2024 company profile, from ${minYear} to ${maxYear} — across mining, energy, infrastructure, tourism, sustainability, training and technical review.`}
+    image="profile-solar-farm"
+    crumbs={[]}
+  />
+
+  <section class="overview section section--warm" id="portfolio-overview" aria-labelledby="overview-title">
+    <div class="container container--wide">
+      <div class="section-head">
+        <div class="section-head__text">
+          <p class="eyebrow">Portfolio at a glance</p>
+          <h2 id="overview-title">What the record shows.</h2>
+          <p>
+            Figures below are calculated from the project list on this page, transcribed from the Black
+            Crystal Company Profile 2024. The profile presents a selection of assignments rather than a
+            complete record.
+          </p>
+        </div>
+      </div>
+
+      <dl class="stats">
+        <div>
+          <dt>Documented assignments</dt>
+          <dd>{total}</dd>
+        </div>
+        <div>
+          <dt>Years covered</dt>
+          <dd>
+            {minYear}–{maxYear}
+          </dd>
+        </div>
+        <div>
+          <dt>Technical EIA reviews</dt>
+          <dd>{reviewCount}</dd>
+        </div>
+        <div>
+          <dt>Prepared to IFC standards</dt>
+          <dd>{ifcCount}</dd>
+        </div>
+      </dl>
+
+      <div class="charts">
+        <figure class="chart">
+          <figcaption>Assignments by profile section</figcaption>
+          <ul class="hbar" role="list">
+            {byGroup.map((g) => (
+              <li>
+                <span class="hbar__label">{g.label}</span>
+                <span class="hbar__track" aria-hidden="true">
+                  <span class:list={['hbar__fill', barClass(g.count, groupMax)]} />
+                </span>
+                <span class="hbar__value">{g.count}</span>
+              </li>
+            ))}
+          </ul>
+        </figure>
+        <figure class="chart">
+          <figcaption>Assignments by year of commencement</figcaption>
+          <div class="vbar" aria-hidden="true">
+            {byYear.map((y) => (
+              <div class="vbar__col">
+                <span class="vbar__value">{y.count || ''}</span>
+                <span class:list={['vbar__fill', barClass(y.count, yearMax)]} />
+                <span class="vbar__year">{String(y.year).slice(2)}</span>
+              </div>
+            ))}
+          </div>
+          <details class="chart__data">
+            <summary>View as table</summary>
+            <table>
+              <caption class="visually-hidden">Assignments by year of commencement</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Year</th>
+                  <th scope="col">Assignments</th>
+                </tr>
+              </thead>
+              <tbody>
+                {byYear.map((y) => (
+                  <tr>
+                    <th scope="row">{y.year}</th>
+                    <td>{y.count}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </details>
+          {noYear > 0 && <p class="chart__note">{noYear} assignment without a stated year is not shown.</p>}
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="portfolio section" aria-labelledby="portfolio-title">
+    <div class="container container--wide">
+      <div class="portfolio__head">
+        <h2 id="portfolio-title">All documented projects</h2>
+        <p class="portfolio__count" role="status" aria-live="polite" data-filter-count>
+          Showing all {total} projects
+        </p>
+      </div>
+
+      <form
+        class="filters"
+        data-project-filters
+        data-service-labels={JSON.stringify(Object.fromEntries(services.map((s) => [s.id, s.data.title])))}
+        hidden
+        aria-label="Filter projects"
+        action="/projects/"
+        method="get"
+      >
+        <div class="filters__field filters__field--search">
+          <label for="filter-q">Keyword</label>
+          <span class="filters__search">
+            <Icon name="search" size={18} />
+            <input
+              id="filter-q"
+              name="q"
+              type="search"
+              placeholder="Client, place or type…"
+              autocomplete="off"
+            />
+          </span>
+        </div>
+        <div class="filters__field">
+          <label for="filter-sector">Sector</label>
+          <select id="filter-sector" name="sector">
+            <option value="">All sectors</option>
+            {sectorIds.map((id) => (
+              <option value={id}>{sectorShortLabels[id]}</option>
+            ))}
+            <option value="cross-sector">Cross-sector</option>
+          </select>
+        </div>
+        <div class="filters__field">
+          <label for="filter-category">Service category</label>
+          <select id="filter-category" name="category">
+            <option value="">All categories</option>
+            {serviceCategories.map((c) => (
+              <option value={c.id}>{c.title}</option>
+            ))}
+          </select>
+        </div>
+        <div class="filters__field">
+          <label for="filter-period">Period</label>
+          <select id="filter-period" name="period">
+            <option value="">All years</option>
+            {periodBuckets.map((b) => (
+              <option value={b.id}>{b.label}</option>
+            ))}
+          </select>
+        </div>
+        <input type="hidden" name="service" data-filter-service />
+        <div class="filters__actions">
+          <button type="reset" class="btn btn--outline btn--sm" data-filter-reset>
+            Clear filters
+          </button>
+        </div>
+        <div class="filters__chips" data-filter-chips aria-label="Active filters"></div>
+      </form>
+
+      <ul class="project-grid" id="project-list" role="list" data-project-list>
+        {projects.map((project) => (
+          <ProjectCard
+            project={project}
+            categories={serviceCategoryOf(
+              services,
+              project.data.services.map((s) => s.id),
+            )}
+            sectorLabels={sectorShortLabels}
+          />
+        ))}
+      </ul>
+      <div class="portfolio__more" data-show-more hidden>
+        <button type="button" class="btn btn--outline" aria-controls="project-list">
+          Show more projects
+        </button>
+      </div>
+      <div class="portfolio__empty" data-filter-empty hidden>
+        <p>
+          <strong>No projects match these filters.</strong>
+        </p>
+        <p>
+          Try removing a filter, or <a href="/contact/">contact us</a> to discuss experience relevant to your
+          project.
+        </p>
+      </div>
+      <p class="portfolio__source">
+        Source: Black Crystal Company Profile 2024, pages 7–20. Client names are reproduced as published in
+        the profile.
+      </p>
+    </div>
+  </section>
+
+  <CtaBand />
+</BaseLayout>
+
+<script>
+  import { initProjectFilters } from '../../scripts/project-filters';
+  initProjectFilters();
+</script>
+
+<style>
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1px;
+    margin-bottom: clamp(28px, 3vw, 40px);
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-border);
+  }
+  .stats div {
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 4px;
+    padding: 22px 24px;
+    background: #fff;
+  }
+  .stats dt {
+    color: var(--color-muted);
+    font-size: 0.875rem;
+  }
+  .stats dd {
+    margin: 0;
+    color: var(--bc-thunder);
+    font-size: clamp(1.8rem, 3vw, 2.6rem);
+    font-weight: 850;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+  .charts {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+    gap: clamp(16px, 2vw, 28px);
+  }
+  .chart {
+    padding: 24px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: #fff;
+  }
+  .chart figcaption {
+    margin-bottom: 18px;
+    font-weight: 800;
+  }
+  .hbar {
+    display: grid;
+    gap: 10px;
+  }
+  .hbar li {
+    display: grid;
+    grid-template-columns: minmax(130px, 1fr) minmax(0, 1.5fr) 2.5ch;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.875rem;
+  }
+  .hbar__track {
+    height: 10px;
+    border-radius: 999px;
+    background: var(--color-surface-warm);
+    overflow: hidden;
+  }
+  .hbar__fill {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--bc-green), #86a96b);
+  }
+  .hbar__value,
+  .vbar__value {
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+  }
+  .vbar {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+    align-items: end;
+    gap: 4px;
+    height: 180px;
+  }
+  .vbar__col {
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    align-items: end;
+    justify-items: center;
+    height: 100%;
+    gap: 4px;
+  }
+  .vbar__value {
+    font-size: 0.75rem;
+    text-align: center;
+  }
+  .vbar__fill {
+    display: block;
+    width: 100%;
+    max-width: 22px;
+    border-radius: 4px 4px 0 0;
+    background: linear-gradient(180deg, var(--bc-gold), #b8862a);
+  }
+  .vbar__year {
+    color: var(--color-muted);
+    font-size: 0.6875rem;
+    font-variant-numeric: tabular-nums;
+  }
+  /* Bar lengths as 5% steps (no inline styles, CSP-safe). */
+  .hbar__fill.w-0,
+  .vbar__fill.w-0 {
+    width: 0;
+    height: 0;
+  }
+  .hbar__fill.w-5 {
+    width: 5%;
+  }
+  .hbar__fill.w-10 {
+    width: 10%;
+  }
+  .hbar__fill.w-15 {
+    width: 15%;
+  }
+  .hbar__fill.w-20 {
+    width: 20%;
+  }
+  .hbar__fill.w-25 {
+    width: 25%;
+  }
+  .hbar__fill.w-30 {
+    width: 30%;
+  }
+  .hbar__fill.w-35 {
+    width: 35%;
+  }
+  .hbar__fill.w-40 {
+    width: 40%;
+  }
+  .hbar__fill.w-45 {
+    width: 45%;
+  }
+  .hbar__fill.w-50 {
+    width: 50%;
+  }
+  .hbar__fill.w-55 {
+    width: 55%;
+  }
+  .hbar__fill.w-60 {
+    width: 60%;
+  }
+  .hbar__fill.w-65 {
+    width: 65%;
+  }
+  .hbar__fill.w-70 {
+    width: 70%;
+  }
+  .hbar__fill.w-75 {
+    width: 75%;
+  }
+  .hbar__fill.w-80 {
+    width: 80%;
+  }
+  .hbar__fill.w-85 {
+    width: 85%;
+  }
+  .hbar__fill.w-90 {
+    width: 90%;
+  }
+  .hbar__fill.w-95 {
+    width: 95%;
+  }
+  .hbar__fill.w-100 {
+    width: 100%;
+  }
+  .vbar__fill.w-5 {
+    height: 5%;
+  }
+  .vbar__fill.w-10 {
+    height: 10%;
+  }
+  .vbar__fill.w-15 {
+    height: 15%;
+  }
+  .vbar__fill.w-20 {
+    height: 20%;
+  }
+  .vbar__fill.w-25 {
+    height: 25%;
+  }
+  .vbar__fill.w-30 {
+    height: 30%;
+  }
+  .vbar__fill.w-35 {
+    height: 35%;
+  }
+  .vbar__fill.w-40 {
+    height: 40%;
+  }
+  .vbar__fill.w-45 {
+    height: 45%;
+  }
+  .vbar__fill.w-50 {
+    height: 50%;
+  }
+  .vbar__fill.w-55 {
+    height: 55%;
+  }
+  .vbar__fill.w-60 {
+    height: 60%;
+  }
+  .vbar__fill.w-65 {
+    height: 65%;
+  }
+  .vbar__fill.w-70 {
+    height: 70%;
+  }
+  .vbar__fill.w-75 {
+    height: 75%;
+  }
+  .vbar__fill.w-80 {
+    height: 80%;
+  }
+  .vbar__fill.w-85 {
+    height: 85%;
+  }
+  .vbar__fill.w-90 {
+    height: 90%;
+  }
+  .vbar__fill.w-95 {
+    height: 95%;
+  }
+  .vbar__fill.w-100 {
+    height: 100%;
+  }
+  .chart__data {
+    margin-top: 16px;
+    font-size: 0.875rem;
+  }
+  .chart__data summary {
+    color: var(--color-gold-readable);
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .chart__data table {
+    width: 100%;
+    margin-top: 10px;
+    border-collapse: collapse;
+  }
+  .chart__data :is(th, td) {
+    padding: 4px 8px;
+    border-bottom: 1px solid var(--color-border);
+    text-align: left;
+  }
+  .chart__note {
+    margin-top: 8px;
+    color: var(--color-muted);
+    font-size: 0.8125rem;
+  }
+
+  .portfolio__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px 24px;
+    margin-bottom: 20px;
+  }
+  .portfolio__head h2 {
+    font-size: clamp(1.6rem, 2.4vw, 2.2rem);
+  }
+  .portfolio__count {
+    color: var(--color-muted);
+    font-weight: 700;
+  }
+  .filters {
+    position: sticky;
+    top: calc(var(--header-h) + 8px);
+    z-index: 5;
+    display: grid;
+    grid-template-columns: minmax(0, 1.6fr) repeat(3, minmax(0, 1fr)) auto;
+    align-items: end;
+    gap: 14px;
+    margin-bottom: 24px;
+    padding: 16px 18px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: rgb(255 255 255 / 96%);
+    box-shadow: var(--shadow-subtle);
+    backdrop-filter: blur(6px);
+  }
+  .filters__field {
+    display: grid;
+    gap: 6px;
+  }
+  .filters label {
+    font-size: 0.8125rem;
+    font-weight: 750;
+  }
+  .filters select,
+  .filters input {
+    width: 100%;
+    min-height: 46px;
+    padding: 10px 12px;
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-sm);
+    background: #fff;
+    font-size: 1rem;
+  }
+  .filters__search {
+    position: relative;
+    display: block;
+  }
+  .filters__search :global(svg) {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    translate: 0 -50%;
+    color: var(--color-muted);
+  }
+  .filters__search input {
+    padding-left: 38px;
+  }
+  .filters__chips {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .filters__chips:empty {
+    display: none;
+  }
+  .filters__chips :global(button) {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 34px;
+    padding: 4px 12px;
+    border: 1px solid var(--bc-gold);
+    border-radius: 999px;
+    background: #fdf8ec;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .project-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+  }
+  .project-grid :global([data-project][hidden]) {
+    display: none;
+  }
+  .portfolio__more {
+    display: flex;
+    justify-content: center;
+    margin-top: 28px;
+  }
+  .portfolio__empty {
+    padding: 32px;
+    border: 1px dashed var(--color-border-strong);
+    border-radius: var(--radius-lg);
+    text-align: center;
+  }
+  .portfolio__empty a {
+    color: var(--color-gold-readable);
+    font-weight: 700;
+  }
+  .portfolio__source {
+    margin-top: 24px;
+    color: var(--color-muted);
+    font-size: 0.8125rem;
+  }
+
+  @media (max-width: 1099.98px) {
+    .filters {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .filters__field--search {
+      grid-column: 1 / -1;
+    }
+    .project-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .charts {
+      grid-template-columns: 1fr;
+    }
+    .stats {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (max-width: 699.98px) {
+    .filters {
+      position: static;
+      grid-template-columns: 1fr;
+    }
+    .project-grid {
+      grid-template-columns: 1fr;
+    }
+    .hbar li {
+      grid-template-columns: minmax(110px, 1fr) minmax(0, 1fr) 2.5ch;
+    }
+  }
+</style>

@@ -1,0 +1,395 @@
+---
+import { Image } from 'astro:assets';
+import Icon from '../ui/Icon.astro';
+import logo from '../../assets/images/brand/logo.png';
+import { aboutLinks, contact } from '../../data/site';
+import type { Sector, Service } from '../../lib/content';
+import type { serviceCategories } from '../../data/site';
+
+interface Props {
+  groups: { category: (typeof serviceCategories)[number]; services: Service[] }[];
+  sectors: Sector[];
+}
+const { groups, sectors } = Astro.props;
+const path = Astro.url.pathname;
+const current = (href: string) => (path === href ? 'page' : undefined);
+
+const panels = [
+  { id: 'about', label: 'About', overview: { label: 'About Black Crystal', href: '/about/' } },
+  { id: 'services', label: 'Services', overview: { label: 'All services', href: '/services/' } },
+  { id: 'sectors', label: 'Sectors', overview: { label: 'All sectors', href: '/sectors/' } },
+  { id: 'projects', label: 'Projects', overview: { label: 'All documented projects', href: '/projects/' } },
+] as const;
+---
+
+<dialog class="mobile-nav" id="mobile-nav" aria-label="Site menu" data-mobile-nav>
+  <div class="mobile-nav__top">
+    <a href="/" class="mobile-nav__brand" aria-label="Black Crystal Consulting — home">
+      <Image src={logo} alt="" width={132} densities={[1, 2]} format="webp" loading="lazy" />
+    </a>
+    <button type="button" class="mobile-nav__close" data-mobile-close>
+      <Icon name="close" size={24} />
+      <span class="visually-hidden">Close menu</span>
+    </button>
+  </div>
+
+  <div class="mobile-nav__viewport" data-mnav-viewport>
+    <section class="mnav-panel is-current" data-mnav-panel="root" aria-label="Main menu">
+      <ul class="mnav-list" role="list">
+        <li>
+          <a class="mnav-row" href="/" aria-current={current('/')}>
+            Home
+          </a>
+        </li>
+        {panels.map((p) => (
+          <li>
+            <button
+              type="button"
+              class="mnav-row"
+              data-mnav-open={p.id}
+              aria-expanded="false"
+              aria-controls={`mnav-${p.id}`}
+            >
+              {p.label}
+              <Icon name="chevron-right" size={20} />
+            </button>
+          </li>
+        ))}
+        <li>
+          <a class="mnav-row" href="/insights/" aria-current={current('/insights/')}>
+            Insights
+          </a>
+        </li>
+        <li>
+          <a class="mnav-row" href="/contact/" aria-current={current('/contact/')}>
+            Contact
+          </a>
+        </li>
+      </ul>
+      <div class="mobile-nav__footer">
+        <a href="/contact/" class="btn btn--primary">
+          Discuss your project <Icon name="arrow-right" />
+        </a>
+        <a href={`mailto:${contact.email}`} class="mnav-contact">
+          <Icon name="mail" size={18} />
+          {contact.email}
+        </a>
+        <a href={contact.phones[0].href} class="mnav-contact">
+          <Icon name="phone" size={18} />
+          {contact.phones[0].label}
+        </a>
+      </div>
+    </section>
+
+    {panels.map((p) => (
+      <section
+        class="mnav-panel"
+        id={`mnav-${p.id}`}
+        data-mnav-panel={p.id}
+        aria-label={`${p.label} menu`}
+        hidden
+      >
+        <button type="button" class="mnav-back" data-mnav-back>
+          <Icon name="chevron-left" size={20} />
+          Back
+        </button>
+        <p class="mnav-title">{p.label}</p>
+        <a class="mnav-overview" href={p.overview.href}>
+          {p.overview.label}
+          <Icon name="arrow-right" size={18} />
+        </a>
+        {p.id === 'about' && (
+          <ul class="mnav-list mnav-list--sub" role="list">
+            {aboutLinks.map((l) => (
+              <li>
+                <a class="mnav-row" href={l.href}>
+                  {l.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        )}
+        {p.id === 'services' &&
+          groups.map(({ category, services }) => (
+            <div class="mnav-group">
+              <a class="mnav-group__title" href={`/services/#${category.id}`}>
+                <Icon name={category.icon} size={18} />
+                {category.title}
+              </a>
+              <ul class="mnav-list mnav-list--sub" role="list">
+                {services.map((s) => (
+                  <li>
+                    <a
+                      class="mnav-row"
+                      href={`/services/${s.id}/`}
+                      aria-current={current(`/services/${s.id}/`)}
+                    >
+                      {s.data.title}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        {p.id === 'sectors' && (
+          <ul class="mnav-list mnav-list--sub" role="list">
+            {sectors.map((s) => (
+              <li>
+                <a
+                  class="mnav-row mnav-row--icon"
+                  href={`/sectors/${s.id}/`}
+                  aria-current={current(`/sectors/${s.id}/`)}
+                >
+                  <Icon name={s.data.icon} size={20} />
+                  {s.data.title}
+                </a>
+              </li>
+            ))}
+          </ul>
+        )}
+        {p.id === 'projects' && (
+          <ul class="mnav-list mnav-list--sub" role="list">
+            <li>
+              <a class="mnav-row" href="/#featured-projects">
+                Featured projects
+              </a>
+            </li>
+            <li>
+              <a class="mnav-row" href="/projects/#portfolio-overview">
+                Portfolio at a glance
+              </a>
+            </li>
+            {sectors.map((s) => (
+              <li>
+                <a class="mnav-row" href={`/projects/?sector=${s.id}`}>
+                  {s.data.shortTitle} projects
+                </a>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+    ))}
+  </div>
+</dialog>
+
+<style>
+  .mobile-nav {
+    position: fixed;
+    inset: 0 0 0 auto;
+    width: min(100%, 440px);
+    max-width: 100%;
+    height: 100dvh;
+    max-height: 100dvh;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: #fff;
+    color: var(--bc-thunder);
+    box-shadow: -24px 0 48px rgb(35 31 32 / 18%);
+    overflow: hidden;
+    overscroll-behavior: contain;
+  }
+  .mobile-nav[open] {
+    display: flex;
+    flex-direction: column;
+  }
+  .mobile-nav::backdrop {
+    background: rgb(29 25 22 / 45%);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .mobile-nav,
+    .mobile-nav::backdrop {
+      transition:
+        transform 320ms var(--ease-out),
+        opacity 260ms var(--ease-standard),
+        overlay 320ms allow-discrete,
+        display 320ms allow-discrete;
+    }
+    .mobile-nav {
+      transform: translateX(100%);
+    }
+    .mobile-nav[open] {
+      transform: none;
+    }
+    .mobile-nav::backdrop {
+      opacity: 0;
+    }
+    .mobile-nav[open]::backdrop {
+      opacity: 1;
+    }
+    @starting-style {
+      .mobile-nav[open] {
+        transform: translateX(100%);
+      }
+      .mobile-nav[open]::backdrop {
+        opacity: 0;
+      }
+    }
+  }
+
+  .mobile-nav__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex: none;
+    height: var(--header-h);
+    padding-inline: 20px 12px;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .mobile-nav__brand {
+    display: inline-flex;
+  }
+  .mobile-nav__close {
+    display: inline-grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    border: 0;
+    border-radius: var(--radius-sm);
+    background: transparent;
+  }
+  .mobile-nav__close:hover {
+    background: var(--color-surface-warm);
+  }
+
+  .mobile-nav__viewport {
+    position: relative;
+    flex: 1;
+    overflow: hidden;
+  }
+  .mnav-panel {
+    position: absolute;
+    inset: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 12px 20px 32px;
+    background: #fff;
+    transition:
+      transform 300ms var(--ease-out),
+      opacity 220ms var(--ease-standard);
+  }
+  .mnav-panel[data-mnav-panel='root'] {
+    display: flex;
+    flex-direction: column;
+  }
+  .mnav-panel.is-behind {
+    transform: translateX(-28%);
+    opacity: 0;
+  }
+  .mnav-panel.is-entering {
+    transform: translateX(100%);
+  }
+
+  .mnav-list {
+    display: grid;
+  }
+  .mnav-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    min-height: 56px;
+    padding: 12px 4px;
+    border: 0;
+    border-bottom: 1px solid var(--color-border);
+    background: none;
+    color: var(--bc-thunder);
+    font-size: 1.125rem;
+    font-weight: 700;
+    text-align: left;
+    text-decoration: none;
+  }
+  .mnav-row svg {
+    flex: none;
+    color: var(--color-muted);
+  }
+  .mnav-row[aria-current='page'] {
+    color: var(--color-gold-readable);
+    box-shadow: inset 3px 0 0 var(--bc-gold);
+    padding-left: 14px;
+  }
+  .mnav-list--sub .mnav-row {
+    min-height: 48px;
+    font-size: 1rem;
+    font-weight: 600;
+  }
+  .mnav-row--icon {
+    justify-content: flex-start;
+  }
+  .mnav-row--icon svg {
+    color: var(--bc-green);
+  }
+
+  .mnav-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 44px;
+    margin-left: -6px;
+    padding: 6px 10px 6px 4px;
+    border: 0;
+    border-radius: var(--radius-sm);
+    background: none;
+    color: var(--color-muted);
+    font-weight: 700;
+  }
+  .mnav-back:hover {
+    background: var(--color-surface-warm);
+  }
+  .mnav-title {
+    margin: 6px 0 4px;
+    font-size: 1.75rem;
+    font-weight: 800;
+    letter-spacing: -0.015em;
+  }
+  .mnav-overview {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    margin-bottom: 8px;
+    color: var(--color-gold-readable);
+    font-weight: 750;
+    text-decoration: none;
+  }
+  .mnav-group {
+    margin-top: 14px;
+  }
+  .mnav-group__title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 40px;
+    color: var(--color-gold-readable);
+    font-size: 0.8125rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-decoration: none;
+  }
+  .mobile-nav__footer {
+    display: grid;
+    gap: 10px;
+    margin-top: auto;
+    padding-top: 28px;
+  }
+  .mobile-nav__footer .btn {
+    width: 100%;
+  }
+  .mnav-contact {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 44px;
+    color: var(--color-body);
+    font-weight: 600;
+    text-decoration: none;
+    word-break: break-word;
+  }
+  .mnav-contact svg {
+    color: var(--bc-green);
+    flex: none;
+  }
+</style>

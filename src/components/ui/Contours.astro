@@ -1,0 +1,25 @@
+---
+// Decorative concentric contours inspired by the brandmark's sedimentation layers (not the logo itself).
+interface Props {
+  class?: string;
+  rings?: number;
+}
+const { class: className, rings = 9 } = Astro.props;
+const base = 'M0-90C55-92 95-40 90 15 86 62 45 95-5 92-58 89-96 52-92 0-88-50-50-88 0-90Z';
+const layers = Array.from({ length: rings }, (_, i) => {
+  const k = 1 - i * (0.9 / rings);
+  return { k, dx: -i * 2.2, dy: i * 1.8 };
+});
+---
+
+<svg class={className} viewBox="-110 -110 220 220" fill="none" aria-hidden="true" focusable="false">
+  <g stroke="currentColor" stroke-width="1" vector-effect="non-scaling-stroke">
+    {layers.map(({ k, dx, dy }) => (
+      <path
+        d={base}
+        transform={`translate(${dx} ${dy}) scale(${k.toFixed(3)})`}
+        vector-effect="non-scaling-stroke"
+      />
+    ))}
+  </g>
+</svg>

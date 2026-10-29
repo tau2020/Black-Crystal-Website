@@ -1,0 +1,472 @@
+@import './tokens.css';
+
+/* ── Reset ─────────────────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scroll-padding-top: calc(var(--header-h) + 16px);
+}
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--color-surface);
+  color: var(--color-body);
+  font-family: var(--font-body);
+  font-size: var(--font-size-body);
+  font-weight: var(--weight-body);
+  line-height: 1.65;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+img,
+picture,
+video,
+svg {
+  display: block;
+  max-width: 100%;
+}
+img,
+video {
+  height: auto;
+}
+input,
+button,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+button {
+  cursor: pointer;
+}
+h1,
+h2,
+h3,
+h4,
+p,
+figure,
+blockquote,
+dl,
+dd {
+  margin: 0;
+}
+/* Zero specificity so layout classes such as .container can still set margins. */
+:where(ul, ol)[role='list'] {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+[hidden] {
+  display: none !important;
+}
+html.is-scroll-locked {
+  overflow: hidden;
+}
+
+/* ── Typography ────────────────────────────────────────────────────────── */
+h1,
+h2,
+h3,
+h4 {
+  color: var(--color-heading);
+  font-family: var(--font-display);
+  font-weight: var(--weight-heading);
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+h1 {
+  font-size: var(--font-size-h1);
+  line-height: 1.07;
+  letter-spacing: -0.022em;
+}
+h2 {
+  font-size: var(--font-size-h2);
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+}
+h3 {
+  font-size: var(--font-size-h3);
+  line-height: 1.25;
+  font-weight: 750;
+}
+h4 {
+  font-size: 1.0625rem;
+  line-height: 1.35;
+  font-weight: 750;
+}
+p {
+  text-wrap: pretty;
+}
+strong,
+b {
+  font-weight: var(--weight-strong);
+}
+a {
+  color: inherit;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+.lead {
+  font-size: var(--font-size-lead);
+  line-height: 1.6;
+  color: var(--color-muted);
+  max-width: 62ch;
+}
+
+/* ── Focus ─────────────────────────────────────────────────────────────── */
+:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+.on-dark {
+  --focus-ring: #f3d792;
+  color: var(--color-on-dark);
+}
+.on-dark :is(h1, h2, h3, h4) {
+  color: var(--color-on-dark);
+}
+
+/* ── Layout ────────────────────────────────────────────────────────────── */
+.container {
+  width: min(calc(100% - 2 * var(--gutter)), var(--container-max));
+  margin-inline: auto;
+}
+.container--wide {
+  width: min(calc(100% - 2 * var(--gutter)), var(--container-wide));
+}
+.container--narrow {
+  width: min(calc(100% - 2 * var(--gutter)), 820px);
+}
+.section {
+  padding-block: var(--section-space);
+}
+.section--warm {
+  background: var(--color-surface-warm);
+}
+.section--cream {
+  background: var(--color-surface-cream);
+}
+.section--tight {
+  padding-block: clamp(40px, 5vw, 72px);
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+.skip-link {
+  position: absolute;
+  left: 16px;
+  top: -100px;
+  z-index: 1000;
+  padding: 12px 18px;
+  border-radius: var(--radius-sm);
+  background: var(--bc-thunder);
+  color: #fff;
+  font-weight: 700;
+  text-decoration: none;
+}
+.skip-link:focus {
+  top: 12px;
+}
+
+/* ── Eyebrows & section headings ───────────────────────────────────────── */
+.eyebrow {
+  display: inline-block;
+  margin-bottom: var(--space-3);
+  color: var(--color-gold-readable);
+  font-size: var(--font-size-eyebrow);
+  font-weight: 800;
+  line-height: 1.3;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.on-dark .eyebrow {
+  color: var(--color-gold-on-dark);
+}
+.section-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  justify-content: space-between;
+  gap: var(--space-4) var(--space-8);
+  margin-bottom: clamp(24px, 3vw, 40px);
+}
+.section-head__text {
+  max-width: 720px;
+}
+.section-head__text p:not(.eyebrow) {
+  margin-top: var(--space-3);
+  color: var(--color-muted);
+  font-size: 1.0625rem;
+}
+
+/* ── Links with arrows ─────────────────────────────────────────────────── */
+.link-arrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55em;
+  color: var(--color-gold-readable);
+  font-weight: 750;
+  font-size: 0.9375rem;
+  text-decoration: none;
+  min-height: 44px;
+}
+.link-arrow svg {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  transition: transform var(--duration-base) var(--ease-standard);
+}
+.link-arrow:hover {
+  text-decoration: underline;
+}
+.link-arrow:hover svg {
+  transform: translateX(3px);
+}
+.on-dark .link-arrow {
+  color: var(--color-gold-on-dark);
+}
+
+/* ── Buttons ───────────────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6em;
+  min-height: 48px;
+  padding: 12px 22px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  font-size: 0.9375rem;
+  font-weight: 750;
+  line-height: 1.2;
+  letter-spacing: 0.005em;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    background-color var(--duration-base) var(--ease-standard),
+    border-color var(--duration-base) var(--ease-standard),
+    color var(--duration-base) var(--ease-standard),
+    transform var(--duration-base) var(--ease-standard);
+}
+.btn svg {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  transition: transform var(--duration-base) var(--ease-standard);
+}
+.btn:hover svg {
+  transform: translateX(3px);
+}
+.btn--primary {
+  background: var(--bc-gold);
+  border-color: var(--bc-gold);
+  color: var(--color-on-gold);
+}
+.btn--primary:hover {
+  background: var(--color-gold-hover);
+  border-color: var(--color-gold-hover);
+}
+.btn--outline-light {
+  background: rgb(20 17 14 / 22%);
+  border-color: rgb(255 255 255 / 85%);
+  color: #fff;
+}
+.btn--outline-light:hover {
+  background: rgb(255 255 255 / 12%);
+  border-color: #fff;
+}
+.btn--outline {
+  background: transparent;
+  border-color: var(--bc-thunder);
+  color: var(--bc-thunder);
+}
+.btn--outline:hover {
+  background: var(--bc-thunder);
+  color: #fff;
+}
+.btn--dark {
+  background: var(--bc-thunder);
+  border-color: var(--bc-thunder);
+  color: #fff;
+}
+.btn--dark:hover {
+  background: #3a3435;
+}
+.btn--sm {
+  min-height: 44px;
+  padding: 10px 18px;
+  font-size: 0.875rem;
+}
+.btn[disabled],
+.btn[aria-disabled='true'] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ── Chips / badges ────────────────────────────────────────────────────── */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--color-body);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.badge-draft {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: #fff4dc;
+  color: #6b4b0f;
+  border: 1px solid #ecd39c;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* ── Shared card behaviour ─────────────────────────────────────────────── */
+.media-zoom {
+  overflow: hidden;
+}
+.media-zoom img {
+  transition: transform var(--duration-slow) var(--ease-standard);
+}
+@media (hover: hover) {
+  :is(a, .card-link):hover .media-zoom img,
+  .media-zoom:hover img {
+    transform: scale(1.04);
+  }
+}
+.card-link {
+  position: relative;
+}
+.card-link .stretched::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+.card-link:has(.stretched:focus-visible) {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 3px;
+}
+.card-link .stretched:focus-visible {
+  outline: none;
+}
+
+/* ── Organic brand frames (CSS masks; see public/masks) ───────────────── */
+.organic-wide,
+.organic-tall {
+  -webkit-mask: url('/masks/organic-wide.svg') center / 100% 100% no-repeat;
+  mask: url('/masks/organic-wide.svg') center / 100% 100% no-repeat;
+}
+.organic-tall {
+  -webkit-mask-image: url('/masks/organic-tall.svg');
+  mask-image: url('/masks/organic-tall.svg');
+}
+
+/* ── Prose (markdown content) ──────────────────────────────────────────── */
+.prose {
+  max-width: 70ch;
+  font-size: 1.0625rem;
+  line-height: 1.75;
+}
+.prose > * + * {
+  margin-top: 1.1em;
+}
+.prose h2 {
+  margin-top: 2em;
+  font-size: clamp(1.5rem, 2.2vw, 2rem);
+}
+.prose h3 {
+  margin-top: 1.7em;
+  font-size: 1.25rem;
+}
+.prose :is(ul, ol) {
+  padding-left: 1.25em;
+}
+.prose li + li {
+  margin-top: 0.45em;
+}
+.prose li::marker {
+  color: var(--bc-gold);
+}
+.prose a {
+  color: var(--color-gold-readable);
+  font-weight: 650;
+}
+.prose blockquote {
+  padding: 1em 1.25em;
+  border-left: 3px solid var(--bc-gold);
+  background: var(--color-surface-warm);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+
+/* ── Scroll reveal ─────────────────────────────────────────────────────────
+   Content is visible by default. scripts/reveal.ts only marks elements that are still below the
+   fold as pending, so a script failure can never leave content hidden. */
+@media (prefers-reduced-motion: no-preference) {
+  [data-reveal] {
+    transition:
+      opacity 560ms var(--ease-out),
+      transform 560ms var(--ease-out);
+  }
+  [data-reveal].reveal-pending {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  [data-reveal-step='1'] {
+    transition-delay: 70ms;
+  }
+  [data-reveal-step='2'] {
+    transition-delay: 140ms;
+  }
+  [data-reveal-step='3'] {
+    transition-delay: 210ms;
+  }
+  [data-reveal-step='4'] {
+    transition-delay: 280ms;
+  }
+}
+
+/* ── Reduced motion ────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

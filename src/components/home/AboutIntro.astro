@@ -1,0 +1,109 @@
+---
+import Icon from '../ui/Icon.astro';
+import MediaImage from '../ui/MediaImage.astro';
+import { about } from '../../data/site';
+---
+
+<section class="about-intro section" aria-labelledby="about-intro-title">
+  <div class="about-intro__grid container container--wide">
+    <div class="about-intro__text" data-reveal>
+      <p class="eyebrow">About Black Crystal</p>
+      <h2 id="about-intro-title">
+        People. Expertise. <span class="block">A Sustainable Future.</span>
+      </h2>
+      <p>{about.intro}</p>
+      <a href="/about/" class="link-arrow">
+        Our Story <Icon name="arrow-right" />
+      </a>
+    </div>
+    <div class="about-intro__visual" data-reveal>
+      <svg class="about-intro__lines" viewBox="0 0 640 300" fill="none" aria-hidden="true">
+        <path d="M20 160C20 70 90 18 190 14 300 9 410 6 520 18 590 26 628 70 630 150 632 240 588 288 470 292 320 297 170 296 90 290 40 285 20 240 20 160Z" />
+        <path d="M4 160C4 60 80 2 190-2 300-7 420-10 530 3 606 12 646 62 648 150 650 252 600 306 470 310 320 315 160 314 80 307 26 300 4 252 4 160Z" />
+      </svg>
+      <div class="organic-wide about-intro__frame">
+        <MediaImage
+          name="banner-zebras"
+          widths={[560, 760, 1040, 1400, 1920]}
+          sizes="(min-width: 1024px) 56vw, 100vw"
+          class="about-intro__img"
+        />
+      </div>
+      <svg class="about-intro__accents" viewBox="0 0 120 180" aria-hidden="true">
+        <path
+          class="gold"
+          d="M14 10C40 2 92 0 108 6c10 4 12 18 4 28-10 13-36 22-64 26C24 63 6 58 4 44 2 30 4 14 14 10Z"
+        />
+        <path
+          class="green"
+          d="M100 66c10-5 18 2 18 14 1 26-6 58-18 84-4 8-12 8-16 0-8-18-9-50-6-74 2-14 12-20 22-24Z"
+        />
+      </svg>
+    </div>
+  </div>
+</section>
+
+<style>
+  .about-intro {
+    background: var(--color-surface-warm);
+    overflow: hidden;
+  }
+  .about-intro__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr);
+    gap: clamp(32px, 5vw, 80px);
+    align-items: center;
+  }
+  .about-intro__text h2 {
+    margin-bottom: 18px;
+  }
+  .block {
+    display: block;
+  }
+  .about-intro__text p:not(.eyebrow) {
+    max-width: 50ch;
+    margin-bottom: 14px;
+    color: var(--color-muted);
+    font-size: 1.0625rem;
+  }
+  .about-intro__visual {
+    position: relative;
+    padding: 4% 6% 3% 2%;
+  }
+  .about-intro__frame :global(img) {
+    width: 100%;
+    aspect-ratio: 2.05 / 1;
+    object-fit: cover;
+    object-position: 50% 62%;
+  }
+  .about-intro__lines {
+    position: absolute;
+    inset: -2% 2% -4% -2%;
+    width: 100%;
+    height: 106%;
+    stroke: var(--bc-mongoose);
+    stroke-width: 1.2;
+    opacity: 0.45;
+  }
+  .about-intro__accents {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 17%;
+    height: auto;
+  }
+  .about-intro__accents .gold {
+    fill: var(--bc-gold);
+  }
+  .about-intro__accents .green {
+    fill: var(--bc-green);
+  }
+  @media (max-width: 899.98px) {
+    .about-intro__grid {
+      grid-template-columns: 1fr;
+    }
+    .about-intro__visual {
+      padding: 6% 8% 2% 0;
+    }
+  }
+</style>

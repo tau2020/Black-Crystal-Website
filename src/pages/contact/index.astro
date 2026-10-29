@@ -1,0 +1,180 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../../components/ui/PageHero.astro';
+import Icon from '../../components/ui/Icon.astro';
+import ContactForm from '../../components/contact/ContactForm.astro';
+import { contact } from '../../data/site';
+import { breadcrumbJsonLd } from '../../lib/seo';
+
+const site = Astro.site ?? new URL('https://blackcrystal.co.zw');
+const mapsUrl = (q: string) => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`;
+---
+
+<BaseLayout
+  title="Contact"
+  description="Discuss your project with Black Crystal Consulting. Offices in Harare, Zimbabwe and Cape Town, South Africa."
+  jsonLd={breadcrumbJsonLd(site, [
+    { name: 'Home', href: '/' },
+    { name: 'Contact', href: '/contact/' },
+  ])}
+>
+  <PageHero
+    title="Discuss your project"
+    eyebrow="Contact"
+    lead="Tell us about your development, its location and timeline, and the support you need. The more context you share, the more useful our first conversation will be."
+    size="compact"
+  />
+
+  <section class="section">
+    <div class="contact-layout container container--wide">
+      <div class="contact-main">
+        <h2 class="contact-main__title">Send us an enquiry</h2>
+        <ContactForm />
+      </div>
+
+      <aside class="contact-aside" aria-labelledby="direct-title">
+        <h2 id="direct-title">Contact us directly</h2>
+        <ul role="list" class="direct">
+          <li>
+            <a href={`mailto:${contact.email}`}>
+              <Icon name="mail" size={20} />
+              <span>
+                <span class="direct__label">Email</span>
+                {contact.email}
+              </span>
+            </a>
+          </li>
+          {contact.phones.map((p) => (
+            <li>
+              <a href={p.href}>
+                <Icon name="phone" size={20} />
+                <span>
+                  <span class="direct__label">{p.note}</span>
+                  {p.label}
+                </span>
+              </a>
+            </li>
+          ))}
+        </ul>
+
+        {contact.offices.map((o) => (
+          <div class="office">
+            <h3>
+              <Icon name="map-pin" size={20} />
+              {o.country}
+            </h3>
+            <p class="office__role">{o.role}</p>
+            <address>
+              {o.lines.map((l) => (
+                <span>{l}</span>
+              ))}
+            </address>
+            <a class="office__map" href={mapsUrl(o.mapQuery)} rel="noopener noreferrer" target="_blank">
+              View on Google Maps <Icon name="external-link" size={16} />
+              <span class="visually-hidden">(opens in a new tab)</span>
+            </a>
+          </div>
+        ))}
+      </aside>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .contact-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.6fr) minmax(300px, 1fr);
+    gap: clamp(32px, 5vw, 80px);
+    align-items: start;
+  }
+  .contact-main__title {
+    margin-bottom: 22px;
+    font-size: clamp(1.5rem, 2.2vw, 2rem);
+  }
+  .contact-aside {
+    display: grid;
+    gap: 18px;
+    padding: 26px;
+    border-radius: var(--radius-lg);
+    background: var(--color-surface-warm);
+    border: 1px solid var(--color-border);
+  }
+  .contact-aside h2 {
+    font-size: 1.25rem;
+  }
+  .direct {
+    display: grid;
+    gap: 8px;
+  }
+  .direct a {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 12px 14px;
+    border-radius: var(--radius-md);
+    background: #fff;
+    border: 1px solid var(--color-border);
+    color: var(--bc-thunder);
+    font-weight: 700;
+    text-decoration: none;
+    word-break: break-word;
+  }
+  .direct a:hover {
+    border-color: var(--bc-gold);
+  }
+  .direct :global(svg) {
+    flex: none;
+    margin-top: 2px;
+    color: var(--bc-green);
+  }
+  .direct__label {
+    display: block;
+    color: var(--color-muted);
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .office {
+    padding-top: 16px;
+    border-top: 1px solid var(--color-border);
+  }
+  .office h3 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1.125rem;
+  }
+  .office h3 :global(svg) {
+    color: var(--bc-gold);
+  }
+  .office__role {
+    margin-top: 2px;
+    color: var(--color-gold-readable);
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .office address {
+    display: grid;
+    margin-top: 8px;
+    font-style: normal;
+    line-height: 1.6;
+  }
+  .office__map {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 40px;
+    margin-top: 6px;
+    color: var(--color-gold-readable);
+    font-size: 0.875rem;
+    font-weight: 700;
+  }
+  @media (max-width: 1023.98px) {
+    .contact-layout {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

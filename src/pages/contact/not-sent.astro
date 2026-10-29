@@ -1,0 +1,61 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../../components/ui/PageHero.astro';
+import Icon from '../../components/ui/Icon.astro';
+import { contact } from '../../data/site';
+
+// Shown after a form post without JavaScript when the server could not accept the enquiry.
+const reasons: Record<string, string> = {
+  invalid: 'Some required details were missing or incomplete. Please go back and check the form.',
+  rate_limited:
+    'We received several enquiries from your connection in a short time. Please wait a few minutes and try again.',
+  not_configured:
+    'Online enquiries are not yet connected on this site, so your message could not be received here.',
+  delivery_failed: 'Our mail service could not accept your message just now.',
+};
+---
+
+<BaseLayout title="Enquiry not sent" description="Your enquiry could not be sent." noindex>
+  <PageHero
+    title="Your enquiry has not been sent"
+    eyebrow="Contact"
+    size="compact"
+    crumbs={[{ name: 'Contact', href: '/contact/' }]}
+  />
+  <section class="section">
+    <div class="container container--narrow outcome">
+      <Icon name="alert" size={44} strokeWidth={1.5} />
+      <p data-reason>We could not accept your enquiry.</p>
+      <p>
+        Please contact us directly at <a href={`mailto:${contact.email}`}>{contact.email}</a> or call
+        <a href={contact.phones[0].href}>{contact.phones[0].label}</a>.
+      </p>
+      <p>
+        <a href="/contact/" class="link-arrow">
+          Back to the contact form <Icon name="arrow-right" />
+        </a>
+      </p>
+    </div>
+  </section>
+</BaseLayout>
+
+<script define:vars={{ reasons }}>
+  const code = new URLSearchParams(location.search).get('reason');
+  const holder = document.querySelector('[data-reason]');
+  if (holder && code && Object.hasOwn(reasons, code)) holder.textContent = reasons[code];
+</script>
+
+<style>
+  .outcome {
+    display: grid;
+    gap: 16px;
+    font-size: 1.125rem;
+  }
+  .outcome :global(svg) {
+    color: #b42318;
+  }
+  .outcome a:not(.link-arrow) {
+    color: var(--color-gold-readable);
+    font-weight: 700;
+  }
+</style>
