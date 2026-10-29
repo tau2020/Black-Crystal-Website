@@ -2,7 +2,7 @@
 
 **Date:** 29 October 2026 · **Build:** `npm run build:review` (production build including draft insights) · **Server:** `server/serve.mjs` on `127.0.0.1` · **Machine:** macOS 26.6, Node 24.0.0, Google Chrome 156; Playwright WebKit and Firefox 157
 
-All testing was local. No CI, cloud builds, deployments or pushes were used.
+Testing was local, plus the checks of the Vercel deployment below. No CI or cloud builds were used: the Vercel deployment was built on this machine.
 
 ## 1. Automated results (final run)
 
@@ -55,6 +55,19 @@ All testing was local. No CI, cloud builds, deployments or pushes were used.
 | `text/plain`; malformed JSON; `GET`                          | `415`; `400`; `405`                                                                                  |
 | Sixth submission within 10 minutes                           | `429` with `Retry-After: 600`                                                                        |
 | Same-origin form post without JavaScript                     | `303 → /contact/not-sent/?reason=not_configured`                                                     |
+
+### Vercel deployment (29 October 2026)
+
+These checks ran against the first deployment at `black-crystal-website.vercel.app`. That deployment uses the production build, with `/api/contact` as a Node 24 function. The `noindex` header was added after these checks.
+
+| Check                                    | Result                                                                                                                                                                                                                                                       |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Pages                                    | `200`, also without the trailing slash. Checked: home, About, services, a sector, projects, a project page, insights, contact, privacy, the sitemap, robots, the search index and the manifest                                                               |
+| Legacy URLs, with and without the slash  | `301` to the new pages. Checked: `/about-us/`, `/mining-sector/`, `/our-services/`, `/contact-us/` and the zero-width-space slug                                                                                                                             |
+| Unknown URL                              | `404` with the site's 404 page                                                                                                                                                                                                                               |
+| Response headers                         | Security headers on pages and API responses. Build assets are `immutable`, and the hero video is served with range requests (`206`)                                                                                                                          |
+| Contact API                              | `GET` `405`. Valid enquiry `503 not_configured`. Invalid fields: `invalid` with per-field messages. Cross-origin `403`. Honeypot `400`. Form post without JavaScript `303 → /contact/not-sent/?reason=not_configured`. Sixth request within 10 minutes `429` |
+| Home page in Chrome (1440px and Pixel 7) | The correct video derivative plays. No console errors or failed requests                                                                                                                                                                                     |
 
 ## 2. Lighthouse 13.6 (production build, local)
 

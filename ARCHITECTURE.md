@@ -112,7 +112,7 @@ The legacy site runs on Apache with WordPress at `blackcrystal.co.zw`. The build
 3. **Netlify / Cloudflare Pages:** swap `@astrojs/node` for the platform adapter. The handler uses standard `Request`/`Response`. `_headers` and `_redirects` are generated. The in-memory rate limiter should be replaced with the platform's KV or rate-limiting features.
 4. **Vercel** (used for previews): `vercel build` sets `VERCEL=1`, which selects `@astrojs/vercel`.
    - Pages and media are served from Vercel's CDN, and `/api/contact` runs as a Node 24 function.
-   - `scripts/postbuild-vercel.mjs` adds the shared headers and all 79 legacy 301s to the routing config.
+   - `scripts/postbuild-vercel.mjs` adds the shared headers and all 79 legacy 301s to the routing config. It also adds `X-Robots-Tag: noindex` unless the build sets `BC_ALLOW_INDEXING=true`.
    - Builds run locally and are uploaded with `vercel deploy --prebuilt` (see `README.md`).
    - For production: the rate limiter is per function instance, so use Vercel's firewall rate limiting or a shared store. Vercel's free Hobby plan is for non-commercial use, so a company site needs a paid plan.
 
