@@ -7,14 +7,16 @@ import { legacyRedirects } from '../src/data/redirects.mjs';
 
 const output = path.resolve('.vercel/output');
 const { routes } = JSON.parse(await readFile(path.join(output, 'config.json'), 'utf8'));
-const beforeFilesystem = routes.slice(
+// Routes before the first `handle` entry run for every request; later phases (filesystem, error) only see the
+// requests those routes pass through. `vercel build` inserts an error phase ahead of the adapter's filesystem one.
+const firstPhase = routes.slice(
   0,
-  routes.findIndex((r) => r.handle === 'filesystem'),
+  routes.findIndex((r) => 'handle' in r),
 );
 
 const resolve = (pathname) => {
   const headers = {};
-  for (const route of beforeFilesystem) {
+  for (const route of firstPhase) {
     if (!new RegExp(route.src).test(pathname)) continue;
     Object.assign(headers, route.headers);
     if (!route.continue) return { status: route.status, headers };
@@ -45,13 +47,18 @@ const walk = async (dir) => {
   }
 };
 await walk(path.join(output, 'static'));
+let noindex = 0;
 for (const page of pages) {
   const { status, headers } = resolve(page);
   if (status !== 200) failures.push(`${page} is shadowed by a ${status} route`);
   if (!headers['Content-Security-Policy']) failures.push(`${page} has no security headers`);
+  if (headers['X-Robots-Tag'] === 'noindex') noindex++;
 }
 
 console.log(`Checked ${legacyRedirects.length} legacy redirects (with variants) and ${pages.length} pages.`);
+console.log(
+  `Search indexing: ${noindex === pages.length ? 'blocked (X-Robots-Tag: noindex)' : `allowed on ${pages.length - noindex} pages`}.`,
+);
 if (failures.length) {
   console.error(failures.join('\n'));
   process.exit(1);

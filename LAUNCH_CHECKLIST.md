@@ -33,6 +33,7 @@ The owner reviewed the localhost build. On 29 October 2026 they approved publish
   - [ ] Set `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`, `CONTACT_TO` and `CONTACT_FROM` on the server (never in Git).
   - [ ] Send a test enquiry and confirm it arrives with the correct Reply-To.
   - [ ] Confirm SPF/DKIM for the sending domain so enquiries are not marked as spam.
+- [ ] If launching on Vercel: build the production deployment with `BC_ALLOW_INDEXING=true`. Without it, every response carries `X-Robots-Tag: noindex`.
 - [ ] `SITE_URL` set to the final canonical origin. If the domain differs from `blackcrystal.co.zw`, add it to `ALLOWED_HOSTS` or update `astro.config.mjs`.
 - [ ] Behind a reverse proxy: set `TRUST_PROXY=true` so rate limiting uses the real client IP.
 - [ ] HTTPS certificate in place. HSTS is sent, so HTTPS must stay available on the domain.

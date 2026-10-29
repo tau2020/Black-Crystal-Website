@@ -57,6 +57,8 @@ vercel deploy --prebuilt                  # uploads .vercel/output as a preview 
 ```
 
 - The preview is the production build: draft insights are excluded. To include them, run `BC_SHOW_DRAFTS=true vercel build`.
+- Vercel builds send `X-Robots-Tag: noindex`, so previews stay out of search results. Build with `BC_ALLOW_INDEXING=true` only when Vercel serves the launched site on its final domain.
+- Vercel makes a new project's first deployment its production deployment, at `black-crystal-website.vercel.app`. Later `vercel deploy --prebuilt` runs create previews behind Vercel login. To update the public address, use `vercel build --prod` and `vercel deploy --prebuilt --prod`.
 - The contact form needs the SMTP variables set as Vercel environment variables. Until then it returns the same honest "not connected" response.
 
 ## Editing content

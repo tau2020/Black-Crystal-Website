@@ -11,8 +11,16 @@ const config = JSON.parse(await readFile(configPath, 'utf8'));
 
 const escapeRegex = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
+// Vercel serves previews until the owner launches there: keep them out of search results unless
+// BC_ALLOW_INDEXING=true (set it only for the production build on the final domain).
+const indexing = process.env.BC_ALLOW_INDEXING === 'true';
+
 const headerRoutes = [
-  { src: '^/(.*)$', headers: securityHeaders, continue: true },
+  {
+    src: '^/(.*)$',
+    headers: indexing ? securityHeaders : { ...securityHeaders, 'X-Robots-Tag': 'noindex' },
+    continue: true,
+  },
   ...cacheRules.map((r) => ({
     src: `^${escapeRegex(r.prefix)}(.*)$`,
     headers: { 'Cache-Control': r.value },
@@ -32,5 +40,5 @@ const redirectRoutes = legacyRedirects.map(({ from, to, hostOnly }) => {
 config.routes = [...headerRoutes, ...redirectRoutes, ...(config.routes ?? [])];
 await writeFile(configPath, `${JSON.stringify(config, null, 2)}\n`);
 console.log(
-  `postbuild-vercel: added ${headerRoutes.length} header routes and ${redirectRoutes.length} redirects to .vercel/output/config.json`,
+  `postbuild-vercel: added ${headerRoutes.length} header routes and ${redirectRoutes.length} redirects to .vercel/output/config.json (search indexing ${indexing ? 'allowed' : 'blocked'})`,
 );
